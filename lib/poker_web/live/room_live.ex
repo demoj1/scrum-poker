@@ -11,14 +11,29 @@ defmodule PokerWeb.RoomLive do
       {:ok,
         socket
         |> put_flash(:info, "Для входа в комнату необходимо ввести свое имя")
-        |> redirect(to: "/")
+        |> redirect(to: "/?next=#{room}")
       }
     else
       Coordinator.add_user_to_room(room, session["user"])
+      room = Coordinator.room_info(room)
+
+      count_vote =
+        room.user_list
+        |> Enum.filter(fn {_, v} -> v[:vote] != nil end)
+        |> Enum.count()
+
+      sum_points =
+        room.user_list
+        |> Enum.filter(fn {_, v} ->
+          v[:vote] != nil and Integer.parse(v[:vote]) != :error
+        end)
+        |> Enum.map(fn {_, v} -> String.to_integer(v[:vote]) end)
+        |> Enum.sum()
 
       {:ok,
         socket
-        |> assign(room: Coordinator.room_info(room))
+        |> assign(room: room)
+        |> assign(avg_score: (is_nil(sum_points) || count_vote == 0) && "---" || sum_points / count_vote)
         |> assign(user: session["user"])
       }
     end
@@ -69,6 +84,16 @@ defmodule PokerWeb.RoomLive do
   end
 
   @impl true
+  def handle_event("start-timer", %{"minutes" => minutes}, socket) do
+    room_id = socket.assigns.room.room_id
+    seconds = String.to_float(minutes) * 60
+
+    Coordinator.start_timer(room_id, seconds)
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("reset-vote", _params, socket) do
     room_id = socket.assigns.room.room_id
 
@@ -78,8 +103,34 @@ defmodule PokerWeb.RoomLive do
   end
 
   @impl true
+  def handle_event("stop-timer", _params, socket) do
+    room_id = socket.assigns.room.room_id
+
+    Coordinator.stop_timer(room_id)
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_info({:update_room, room}, socket) do
-    {:noreply, assign(socket, room: room)}
+    count_vote =
+      room.user_list
+      |> Enum.filter(fn {_, v} -> v[:vote] != nil end)
+      |> Enum.count()
+
+    sum_points =
+      room.user_list
+      |> Enum.filter(fn {_, v} ->
+        v[:vote] != nil and Integer.parse(v[:vote]) != :error
+      end)
+      |> Enum.map(fn {_, v} -> String.to_integer(v[:vote]) end)
+      |> Enum.sum()
+
+    {:noreply,
+      socket
+      |> assign(room: room)
+      |> assign(avg_score: (is_nil(sum_points) || count_vote == 0) && "---" || sum_points / count_vote)
+    }
   end
 
   @impl true

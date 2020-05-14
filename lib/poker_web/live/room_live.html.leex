@@ -9,10 +9,30 @@
 
 <div class="info-card">
   <h3>Комната: "<%= @room.name %>"</h3>
-  <h3>Участников: <%= Enum.count(@room.user_list) |> inspect() %></h3>
+  <h3>Участников: <%= Enum.count(@room.user_list)%></h3>
   <h3>Владелец: "<%= @room.owner_id %>"</h3>
 </div>
 <hr/>
+
+<%= if @room[:timer] do %>
+<div class="timer">
+  <h2>Таймер</h2>
+  <svg class="progress-ring" viewBox="0 0 85 85" width="100" height="100">
+    <circle
+      class="progress-ring__circle"
+      stroke="blue"
+      stroke-width="5"
+      fill="#fbfbfb"
+      cx="-50%"
+      cy="50%"
+      r="40"
+      style="stroke-dasharray: 251.32 251.32; stroke-dashoffset: <%= 251.32 * (@room[:timer].current_seconds * 100 / @room[:timer].total_seconds) / 100 %>;"
+    />
+    <text x="50%" y="65%" text-anchor="middle"><%= @room[:timer][:minutes] %>:<%= @room[:timer][:seconds] |> round() %></text>
+  </svg>
+</div>
+<hr/>
+<% end %>
 
 <h2>Карты для оценки</h2>
 <div class="deck">
@@ -24,20 +44,29 @@
 </div>
 <hr/>
 
+<%= if @user == @room.owner_id do %>
 <div class="action-panel">
-  <%= if @user == @room.owner_id do %>
     <%= if @room[:open?] do %>
       <button phx-click="close">Спрятать голоса</button>
     <% else %>
       <button phx-click="open">Показать голоса</button>
     <% end %>
     <button phx-click="reset-vote">Очистить голоса</button>
-    <hr/>
+    <button phx-click="stop-timer">Остановить таймер</button>
+</div>
+<div class="timer-panel">
+  <h4>Запустить таймер</h4>
+  <%= for num <- [0.1, 1.0, 1.5, 2.0, 3.5, 5.0, 10.0, 15.0] do %>
+    <button class="timer-btn" phx-click="start-timer" phx-value-minutes="<%= num %>">
+      <%= num %> мин.
+    </button>
   <% end %>
 </div>
+<hr/>
+<% end %>
 
 <div class="list">
-  <h2>Проголосовал</h3>
+  <h2>Проголосовал<%= if @user == @room.owner_id do %>, средний балл: <%= @avg_score %><% end %></h3>
   <div class="user-list">
   <%= for {user_name, opts} <- @room.user_list, opts[:vote] != nil do %>
     <button class="user-card" phx-click="open-self" phx-value-user="<%= user_name %>">
@@ -63,4 +92,3 @@
   <% end %>
   </div>
 </div>
-

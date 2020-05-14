@@ -43,6 +43,14 @@ defmodule Poker.Coordinator do
     GenServer.cast(__MODULE__, {:reset_vote, room_id})
   end
 
+  def start_timer(room_id, seconds) do
+    GenServer.cast(__MODULE__, {:start_timer, room_id, seconds})
+  end
+
+  def stop_timer(room_id) do
+    GenServer.cast(__MODULE__, {:stop_timer, room_id})
+  end
+
   # =======================================================
 
   def handle_call({:room_info, room_id}, _from, state) do
@@ -89,7 +97,7 @@ defmodule Poker.Coordinator do
         end)
       end)
 
-      Phoenix.PubSub.broadcast!(Poker.PubSub, "rooms", {:update_rooms, new_state.rooms})
+      Phoenix.PubSub.broadcast!(Poker.PubSub, "rooms", :update_rooms)
 
       {:noreply, new_state}
     else
@@ -130,6 +138,20 @@ defmodule Poker.Coordinator do
   def handle_cast({:open_self_card, room_id, user_id}, state) do
     room_pid = state.rooms[room_id][:pid]
     GenServer.cast(room_pid, {:open_self_card, user_id})
+
+    {:noreply, state}
+  end
+
+  def handle_cast({:start_timer, room_id, seconds}, state) do
+    room_pid = state.rooms[room_id][:pid]
+    GenServer.cast(room_pid, {:start_timer, seconds})
+
+    {:noreply, state}
+  end
+
+  def handle_cast({:stop_timer, room_id}, state) do
+    room_pid = state.rooms[room_id][:pid]
+    GenServer.cast(room_pid, :stop_timer)
 
     {:noreply, state}
   end
@@ -224,5 +246,71 @@ defmodule Poker.Room do
     Phoenix.PubSub.broadcast(Poker.PubSub, "room:#{state.room_id}", {:update_room, new_state})
 
     {:noreply, new_state}
+  end
+
+  @impl true
+  def handle_cast({:start_timer, seconds}, state) do
+    ref = make_ref()
+    :timer.send_after(1000, self(), {:tick, ref})
+
+    new_state =
+      state
+      |> Map.put(:timer, timer_to_view(seconds, seconds))
+      |> Map.put(:timer_ref, ref)
+
+    Phoenix.PubSub.broadcast(Poker.PubSub, "room:#{state.room_id}", {:update_room, new_state})
+
+    {:noreply, new_state}
+  end
+
+  @impl true
+  def handle_cast(:stop_timer, state) do
+    new_state =
+      state
+      |> Map.drop([:timer, :timer_ref])
+
+    Phoenix.PubSub.broadcast(Poker.PubSub, "room:#{state.room_id}", {:update_room, new_state})
+
+    {:noreply, new_state}
+  end
+
+  @impl true
+  def handle_info({:tick, ref}, state) do
+    case {state[:timer], state[:timer_ref] == ref} do
+      {nil, _} -> {:noreply, state}
+      {_, false} -> {:noreply, state}
+      {timer, true} ->
+        %{
+          current_seconds: current_seconds,
+          total_seconds: total_seconds
+        } = timer
+
+        if current_seconds - 1 <= 0 do
+          new_state = Map.put(state, :timer, nil)
+          Phoenix.PubSub.broadcast(Poker.PubSub, "room:#{state.room_id}", {:update_room, new_state})
+          {:noreply, new_state}
+        else
+          :timer.send_after(1000, self(), {:tick, ref})
+
+          new_state = Map.put(state, :timer, timer_to_view(current_seconds - 1, total_seconds))
+
+          Phoenix.PubSub.broadcast(Poker.PubSub, "room:#{state.room_id}", {:update_room, new_state})
+
+          {:noreply, new_state}
+        end
+    end
+  end
+
+  defp timer_to_view(current_seconds, total_seconds) do
+
+    minutes = floor(current_seconds / 60)
+    seconds = current_seconds - minutes * 60.0
+
+    %{
+      seconds: seconds,
+      minutes: minutes,
+      total_seconds: total_seconds,
+      current_seconds: current_seconds
+    }
   end
 end

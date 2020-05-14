@@ -288,3 +288,22 @@ header {
     }
   }
 }
+
+.timer {
+  font-size: 3rem;
+  
+  .progress-ring {
+    .progress-ring__circle {
+      transition: 0.35s stroke-dashoffset;
+      // axis compensation
+      transform: rotate(-90deg);
+    }
+    
+    input {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      width: 80px;
+    }
+  }
+}
