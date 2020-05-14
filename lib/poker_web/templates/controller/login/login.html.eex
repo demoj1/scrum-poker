@@ -1,0 +1,30 @@
+<html>
+    <head>
+        <style>
+            form {
+                font-size: 30px;
+            }
+
+            html {
+                height: 100%;
+            }
+
+            body {
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .container {
+                max-width: 400px;
+            }
+        </style>
+    </head>
+    <body>
+        <%= form_for @conn, "/", fn f -> %>
+            Введите свое имя: <%= text_input f, :name %>
+            <%= submit "Войти" %>
+        <% end %>
+    </body>
+</html>

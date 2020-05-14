@@ -1,0 +1,66 @@
+<header>
+  <h1><a href="/ws">Simple scrum poker</a></h1>
+  <div class="right-panel">
+    <h2 class="info">Пользователь: </h2>
+    <h2><%= assigns[:user] %></h2>
+    <a href="/logout"a><button>Выйти</button></a>
+  </div>
+</header>
+
+<div class="info-card">
+  <h3>Комната: "<%= @room.name %>"</h3>
+  <h3>Участников: <%= Enum.count(@room.user_list) |> inspect() %></h3>
+  <h3>Владелец: "<%= @room.owner_id %>"</h3>
+</div>
+<hr/>
+
+<h2>Карты для оценки</h2>
+<div class="deck">
+  <%= for num <- [1, 2, 3, 5, 8, 13, 20, 40, 100, "❓"] do %>
+    <button class="card" phx-click="select-card" phx-value-score="<%= num %>">
+      <%= num %>
+    </button>
+  <% end %>
+</div>
+<hr/>
+
+<div class="action-panel">
+  <%= if @user == @room.owner_id do %>
+    <%= if @room[:open?] do %>
+      <button phx-click="close">Спрятать голоса</button>
+    <% else %>
+      <button phx-click="open">Показать голоса</button>
+    <% end %>
+    <button phx-click="reset-vote">Очистить голоса</button>
+    <hr/>
+  <% end %>
+</div>
+
+<div class="list">
+  <h2>Проголосовал</h3>
+  <div class="user-list">
+  <%= for {user_name, opts} <- @room.user_list, opts[:vote] != nil do %>
+    <button class="user-card" phx-click="open-self" phx-value-user="<%= user_name %>">
+      <span class="user-name"><%= user_name %></span>
+      <%= if @room[:open?] or opts[:open?] do %>
+        <span class="user-vote"><%= opts[:vote] %></span>
+      <% else %>
+        <span class="user-hidden-vote">?</span>
+      <% end %>
+    </button>
+  <% end %>
+  </div>
+</div>
+
+<div class="list">
+  <h2>В процессе голосования</h3>
+  <div class="user-list">
+  <%= for {user_name, opts} <- @room.user_list, opts[:vote] == nil do %>
+    <button class="user-card">
+      <span class="user-name"><%= user_name %></span>
+      <span class="user-hidden-vote">?</span>
+    </button>
+  <% end %>
+  </div>
+</div>
+
