@@ -5,7 +5,6 @@ defmodule Poker.Application do
 
   def start(_type, _args) do
     children = [
-      PokerWeb.Telemetry,
       {Phoenix.PubSub, name: Poker.PubSub},
       PokerWeb.Endpoint,
       Poker.Coordinator
