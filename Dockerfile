@@ -33,7 +33,7 @@ COPY lib lib
 RUN mix do compile, release
 
 # prepare release image
-FROM alpine:3.9 AS app
+FROM alpine:3.9 AS poker
 RUN apk add --no-cache openssl ncurses-libs
 
 WORKDIR /app
