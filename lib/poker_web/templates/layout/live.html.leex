@@ -1,9 +1,9 @@
 <main role="main" class="container">
+  <%= @inner_content %>
+
   <p class="alert alert-danger" role="alert"
     phx-click="lv:clear-flash"
     phx-value-key="error"><%= live_flash(@flash, :error) %></p>
-
-  <%= @inner_content %>
 
   <p class="alert alert-info" role="alert"
     phx-click="lv:clear-flash"

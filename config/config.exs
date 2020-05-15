@@ -7,9 +7,6 @@
 # General application configuration
 use Mix.Config
 
-config :poker,
-  ecto_repos: [Poker.Repo]
-
 # Configures the endpoint
 config :poker, PokerWeb.Endpoint,
   url: [host: "localhost"],

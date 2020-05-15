@@ -17,7 +17,7 @@ defmodule PokerWeb.PageLive do
 
   @impl true
   def handle_info(:update_rooms, socket) do
-    rooms = Coordinator.get_room_list(socket.assigns[:user])
+    rooms = Coordinator.get_room_list(socket.assigns.user)
     {:noreply, assign(socket, :room_list, rooms)}
   end
 

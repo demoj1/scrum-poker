@@ -31,7 +31,7 @@ defmodule PokerWeb.Controller.Login do
 
   def auth(conn, params) do
     conn
-    |> put_session(:user, params["name"])
+    |> put_session(:user, %{name: params["name"], id: System.unique_integer()})
     |> put_status(302)
     |> redirect(to: "/ws")
     |> live_render(PokerWeb.PageLive)
