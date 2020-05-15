@@ -150,6 +150,14 @@ defmodule PokerWeb.RoomLive do
     }
   end
 
+  @impl true
+  def handle_info(:room_timeout, socket) do
+    {:noreply,
+      socket
+      |> put_flash(:info, "Комната была закрыта в связи с бездействием")
+      |> redirect(to: "/ws")}
+  end
+
   defp room_avg_score(room) do
     count_vote =
       room.user_list

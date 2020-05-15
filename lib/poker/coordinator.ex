@@ -2,6 +2,11 @@ defmodule Poker.Coordinator do
   alias Poker.NameGenerator
   use GenServer
 
+  @impl true
+  def init(init_arg) do
+    {:ok, init_arg}
+  end
+
   def start_link(_params) do
     GenServer.start_link(__MODULE__, %{rooms: %{}}, name: __MODULE__)
   end
@@ -33,6 +38,7 @@ defmodule Poker.Coordinator do
 
   # =======================================================
 
+  @impl true
   def handle_call({:room_info, room_id, []}, _from, state) do
     room_pid = state.rooms[room_id][:pid]
     if room_pid == nil do
@@ -42,6 +48,7 @@ defmodule Poker.Coordinator do
     end
   end
 
+  @impl true
   def handle_call({:get_user_list, room_id}, _from, state) do
     room_pid = state.rooms[room_id][:pid]
     if room_pid == nil do
@@ -51,6 +58,7 @@ defmodule Poker.Coordinator do
     end
   end
 
+  @impl true
   def handle_call({:room_list, user}, _from, state) do
     rooms =
       state.rooms
@@ -59,39 +67,16 @@ defmodule Poker.Coordinator do
     {:reply, rooms, state}
   end
 
-  def handle_cast({:vote, room_id, [user_id, score]}, state) do
-    room_pid = state.rooms[room_id][:pid]
-    GenServer.cast(room_pid, {:vote, user_id, score})
+  @impl true
+  def handle_call({:room_timeout, room_id}, _from, state) do
+    {_, state} = pop_in(state, [:rooms, room_id])
 
-    {:noreply, state}
+    Phoenix.PubSub.broadcast!(Poker.PubSub, "room:#{room_id}", :room_timeout)
+    Phoenix.PubSub.broadcast!(Poker.PubSub, "rooms", :update_rooms)
+    {:reply, :ok, state}
   end
 
-  def handle_cast({:add_user_to_room, room_id, [user]}, state) do
-    room_pid = state.rooms[room_id][:pid]
-    unless room_pid == nil do
-      GenServer.cast(room_pid, {:add_user, user})
-
-      new_state = update_in(state, [:rooms, room_id], fn room ->
-        Map.update(room, :users, MapSet.new([user]), fn users ->
-          MapSet.put(users, user)
-        end)
-      end)
-
-      Phoenix.PubSub.broadcast!(Poker.PubSub, "rooms", :update_rooms)
-
-      {:noreply, new_state}
-    else
-      {:noreply, state}
-    end
-  end
-
-  def handle_cast({:change_card_visibility, room_id, [flag]}, state) do
-    room_pid = state.rooms[room_id][:pid]
-    GenServer.cast(room_pid, {:change_card_visibility, flag})
-
-    {:noreply, state}
-  end
-
+  @impl true
   def handle_call({:create_room, owner_id, room_opts}, _from, state) do
     room_id = :crypto.strong_rand_bytes(64) |> Base.url_encode64 |> binary_part(0, 64)
     room_name = room_opts[:name] || NameGenerator.get_name
@@ -115,6 +100,43 @@ defmodule Poker.Coordinator do
     {:reply, room_id, new_state}
   end
 
+  @impl true
+  def handle_cast({:vote, room_id, [user_id, score]}, state) do
+    room_pid = state.rooms[room_id][:pid]
+    GenServer.cast(room_pid, {:vote, user_id, score})
+
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_cast({:add_user_to_room, room_id, [user]}, state) do
+    room_pid = state.rooms[room_id][:pid]
+    unless room_pid == nil do
+      GenServer.cast(room_pid, {:add_user, user})
+
+      new_state = update_in(state, [:rooms, room_id], fn room ->
+        Map.update(room, :users, MapSet.new([user]), fn users ->
+          MapSet.put(users, user)
+        end)
+      end)
+
+      Phoenix.PubSub.broadcast!(Poker.PubSub, "rooms", :update_rooms)
+
+      {:noreply, new_state}
+    else
+      {:noreply, state}
+    end
+  end
+
+  @impl true
+  def handle_cast({:change_card_visibility, room_id, [flag]}, state) do
+    room_pid = state.rooms[room_id][:pid]
+    GenServer.cast(room_pid, {:change_card_visibility, flag})
+
+    {:noreply, state}
+  end
+
+  @impl true
   def handle_cast({:open_self_card, room_id, [user_id]}, state) do
     room_pid = state.rooms[room_id][:pid]
     GenServer.cast(room_pid, {:open_self_card, user_id})
@@ -122,6 +144,7 @@ defmodule Poker.Coordinator do
     {:noreply, state}
   end
 
+  @impl true
   def handle_cast({:start_timer, room_id, [seconds]}, state) do
     room_pid = state.rooms[room_id][:pid]
     GenServer.cast(room_pid, {:start_timer, seconds})
@@ -129,6 +152,7 @@ defmodule Poker.Coordinator do
     {:noreply, state}
   end
 
+  @impl true
   def handle_cast({:stop_timer, room_id}, state) do
     room_pid = state.rooms[room_id][:pid]
     GenServer.cast(room_pid, :stop_timer)
@@ -136,6 +160,7 @@ defmodule Poker.Coordinator do
     {:noreply, state}
   end
 
+  @impl true
   def handle_cast({:reset_vote, room_id, []}, state) do
     room_pid = state.rooms[room_id][:pid]
     GenServer.cast(room_pid, :reset_vote)
@@ -143,6 +168,7 @@ defmodule Poker.Coordinator do
     {:noreply, state}
   end
 
+  @impl true
   def handle_cast({:reset_user_vote, room_id, [user]}, state) do
     room_pid = state.rooms[room_id][:pid]
     GenServer.cast(room_pid, {:reset_user_vote, user})
@@ -158,27 +184,34 @@ defmodule Poker.Room do
   def init({owner_id, room_id, room_name, room_opts}) do
     opts = Enum.into(room_opts, %{})
 
+    Process.send_after(self(), :timeout, 1000)
+
     {:ok, Map.merge(%{
       name: room_name,
       room_id: room_id,
       owner_id: owner_id,
       open?: false,
-      user_list: %{}
+      user_list: %{},
+      updated: DateTime.utc_now()
     }, opts)}
   end
 
   @impl true
   def handle_call(:room_info, _from, state) do
+    state = touch_room(state)
     {:reply, state, state}
   end
 
   @impl true
   def handle_call(:get_users, _from, state) do
+    state = touch_room(state)
     {:reply, state.user_list, state}
   end
 
   @impl true
   def handle_cast({:vote, user, score}, state) do
+    state = touch_room(state)
+
     new_state = update_in(state, [:user_list, user], fn user_opts ->
       Map.put(user_opts, :vote, score)
     end)
@@ -190,6 +223,8 @@ defmodule Poker.Room do
 
   @impl true
   def handle_cast({:add_user, user}, state) do
+    state = touch_room(state)
+
     new_state = update_in(state, [:user_list], fn user_list ->
       Map.put_new(user_list, user, %{})
     end)
@@ -201,6 +236,8 @@ defmodule Poker.Room do
 
   @impl true
   def handle_cast({:change_card_visibility, flag}, state) do
+    state = touch_room(state)
+
     new_state = Map.update!(state, :open?, fn _ -> flag end)
 
     Phoenix.PubSub.broadcast(Poker.PubSub, "room:#{state.room_id}", {:update_room, new_state})
@@ -210,6 +247,8 @@ defmodule Poker.Room do
 
   @impl true
   def handle_cast({:open_self_card, user}, state) do
+    state = touch_room(state)
+
     new_state = update_in(state, [:user_list, user], fn opts ->
       Map.update(opts, :open?, true, fn old -> not old end)
     end)
@@ -221,6 +260,8 @@ defmodule Poker.Room do
 
   @impl true
   def handle_cast(:reset_vote, state) do
+    state = touch_room(state)
+
     new_state =
       state
       |> update_in([:user_list], fn users ->
@@ -237,6 +278,8 @@ defmodule Poker.Room do
 
   @impl true
   def handle_cast({:start_timer, seconds}, state) do
+    state = touch_room(state)
+
     ref = make_ref()
     :timer.send_after(1000, self(), {:tick, ref})
 
@@ -252,6 +295,8 @@ defmodule Poker.Room do
 
   @impl true
   def handle_cast(:stop_timer, state) do
+    state = touch_room(state)
+
     new_state =
       state
       |> Map.drop([:timer, :timer_ref])
@@ -263,6 +308,8 @@ defmodule Poker.Room do
 
   @impl true
   def handle_cast({:reset_user_vote, user}, state) do
+    state = touch_room(state)
+
     new_state =
       state
       |> update_in([:user_list, user, :vote], fn _ -> nil end)
@@ -299,6 +346,17 @@ defmodule Poker.Room do
     end
   end
 
+  @impl true
+  def handle_info(:timeout, state) do
+    if DateTime.diff(DateTime.utc_now(), state.updated) > 3 * 60 * 60 do
+      GenServer.call(Poker.Coordinator, {:room_timeout, state.room_id})
+      {:stop, :normal, nil}
+    else
+      send(self(), :timeout)
+      {:noreply, state}
+    end
+  end
+
   defp timer_to_view(current_seconds, total_seconds) do
 
     minutes = floor(current_seconds / 60)
@@ -310,5 +368,9 @@ defmodule Poker.Room do
       total_seconds: total_seconds,
       current_seconds: current_seconds
     }
+  end
+
+  defp touch_room(state) do
+    state |> Map.put(:updated, DateTime.utc_now())
   end
 end
