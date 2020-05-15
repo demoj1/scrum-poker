@@ -33,17 +33,17 @@ COPY lib lib
 RUN mix do compile, release
 
 # prepare release image
-FROM alpine:3.9 AS poker
-RUN apk add --no-cache openssl ncurses-libs
+# FROM alpine:3.9 AS poker
+# RUN apk add --no-cache openssl ncurses-libs
 
-WORKDIR /app
+# WORKDIR /app
 
-RUN chown nobody:nobody /app
+# RUN chown nobody:nobody /app
 
-USER nobody:nobody
+# USER nobody:nobody
 
-COPY --from=build --chown=nobody:nobody /app/_build/prod/rel/poker ./
+# COPY --from=build --chown=nobody:nobody /app/_build/prod/rel/poker ./
 
-ENV HOME=/app
+# ENV HOME=/app
 
-CMD ["bin/poker", "start"]
+# CMD ["bin/poker", "start"]
