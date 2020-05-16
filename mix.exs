@@ -20,7 +20,7 @@ defmodule Poker.MixProject do
   def application do
     [
       mod: {Poker.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :logger_file_backend, :runtime_tools]
     ]
   end
 
@@ -40,7 +40,8 @@ defmodule Poker.MixProject do
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
-      {:plug_cowboy, "~> 2.0"}
+      {:plug_cowboy, "~> 2.0"},
+      {:logger_file_backend, "~> 0.0.10"},
     ]
   end
 

@@ -9,7 +9,13 @@ config :poker, PokerWeb.Endpoint,
   server: true
 
 # Do not print debug messages in production
-config :logger, level: :info
+config :logger,
+  level: :info,
+  backends: [{LoggerFileBackend, :all_log}]
+
+config :logger, :all_log,
+  path: "/app/log.log",
+  level: :info
 
 # ## SSL Support
 #
