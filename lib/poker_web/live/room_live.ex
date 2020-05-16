@@ -17,14 +17,24 @@ defmodule PokerWeb.RoomLive do
       Coordinator.room_cast(:add_user_to_room, room, [session["user"]])
       room = Coordinator.room_call(:room_info, room)
 
-      avg_score = room_avg_score(room)
+      case room do
+        nil ->
+          {:ok,
+            socket
+            |> assign(user: session["user"])
+            |> put_flash(:error, "Комната не существует")
+            |> redirect(to: "/ws")
+          }
+        room ->
+          avg_score = room_avg_score(room)
 
-      {:ok,
-        socket
-        |> assign(room: room)
-        |> assign(avg_score: avg_score)
-        |> assign(user: session["user"])
-      }
+          {:ok,
+            socket
+            |> assign(room: room)
+            |> assign(avg_score: avg_score)
+            |> assign(user: session["user"])
+          }
+      end
     end
   end
 

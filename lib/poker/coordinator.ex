@@ -153,7 +153,7 @@ defmodule Poker.Coordinator do
   end
 
   @impl true
-  def handle_cast({:stop_timer, room_id}, state) do
+  def handle_cast({:stop_timer, room_id, []}, state) do
     room_pid = state.rooms[room_id][:pid]
     GenServer.cast(room_pid, :stop_timer)
 
