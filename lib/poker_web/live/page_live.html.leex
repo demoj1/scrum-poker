@@ -1,7 +1,8 @@
 <header>
-  <h1><a href="/ws">Simple scrum poker</a></h1>
+  <h1 class="xs"><a href="/ws">Simple scrum poker</a></h1>
+  <h1 class="sm"><a href="/ws">Ssp</a></h1>
   <div class="right-panel">
-    <h2 class="info">Пользователь: </h2>
+    <h2 class="xs">Пользователь: </h2>
     <h2><%= assigns[:user].name %></h2>
     <a href="/logout"a><button>Выйти</button></a>
   </div>
@@ -15,16 +16,23 @@
   <section>
     <h1>Список доступных комнат</h1>
 
-    <div class="room-list">
-    <%= for {room_id, %{name: name, users: users} = opts} <- @room_list do %>
-      <a href="/ws/<%= room_id %>">
-        <%= if opts[:owner] == @user do%>
-          <%# <b>x</b> %>
-        <% end %>
-        <strong><%= name %><br/></strong>
-        Участников: <%= Enum.count(users) %>
-      </a>
+    <%= if Enum.count(@room_list) > 0 do %>
+      <div class="room-list">
+      <%= for {room_id, %{name: name, users: users} = opts} <- @room_list do %>
+        <a href="/ws/<%= room_id %>">
+          <%= if opts[:owner] == @user do%>
+            <%# <b>x</b> %>
+          <% end %>
+          <strong><%= name %><br/></strong>
+          Участников: <%= Enum.count(users) %>
+        </a>
+      <% end %>
+      </div>
+    <% else %>
+      <p>
+        Список комнат пуст, для отображения необходимо присоединиться или создать новую комнату.<br/>
+        Комнаты удаляются после 6 часов неактивности.
+      </p>
     <% end %>
-    </div>
   </section>
 <% end %>

@@ -1,7 +1,8 @@
 <header>
-  <h1><a href="/ws">Simple scrum poker</a></h1>
+  <h1 class="xs"><a href="/ws">Simple scrum poker</a></h1>
+  <h1 class="sm"><a href="/ws">Ssp</a></h1>
   <div class="right-panel">
-    <h2 class="info">Пользователь: </h2>
+    <h2 class="xs">Пользователь: </h2>
     <h2><%= assigns[:user].name %></h2>
     <a href="/logout"a><button>Выйти</button></a>
   </div>
@@ -13,26 +14,6 @@
   <h3>Владелец: "<%= @room.owner_id.name %>"</h3>
 </div>
 <hr/>
-
-<%= if @room[:timer] do %>
-<div class="timer">
-  <h2>Таймер</h2>
-  <svg class="progress-ring" viewBox="0 0 85 85" width="100" height="100">
-    <circle
-      class="progress-ring__circle"
-      stroke="blue"
-      stroke-width="5"
-      fill="#fcfcfc"
-      cx="-50%"
-      cy="50%"
-      r="40"
-      style="stroke-dasharray: 251.32 251.32; stroke-dashoffset: <%= 251.32 * (@room[:timer].current_seconds * 100 / @room[:timer].total_seconds) / 100 %>;"
-    />
-    <text x="50%" y="65%" text-anchor="middle"><%= @room[:timer][:minutes] %>:<%= @room[:timer][:seconds] |> round() %></text>
-  </svg>
-</div>
-<hr/>
-<% end %>
 
 <h2>Карты для оценки</h2>
 <div class="deck">
@@ -46,6 +27,8 @@
 
 <%= if @user == @room.owner_id do %>
 <div class="action-panel">
+  <h4>Панель действий</h4>
+  <div class="action-panel-buttons">
     <%= if @room[:open?] do %>
       <button phx-click="close">Спрятать голоса</button>
     <% else %>
@@ -53,14 +36,17 @@
     <% end %>
     <button phx-click="reset-vote">Очистить голоса</button>
     <button phx-click="stop-timer">Остановить таймер</button>
+  </div>
 </div>
 <div class="timer-panel">
   <h4>Запустить таймер</h4>
-  <%= for num <- [0.1, 1.0, 1.5, 2.0, 3.5, 5.0, 10.0, 15.0] do %>
-    <button class="timer-btn" phx-click="start-timer" phx-value-minutes="<%= num %>">
-      <%= num %> мин.
-    </button>
-  <% end %>
+  <div class="timer-panel-buttons">
+    <%= for num <- [0.1, 1.0, 1.5, 2.0, 3.5, 5.0, 10.0, 15.0] do %>
+      <button class="timer-btn" phx-click="start-timer" phx-value-minutes="<%= num %>">
+        <%= num %> мин.
+      </button>
+    <% end %>
+  </div>
 </div>
 <hr/>
 <% end %>
@@ -96,3 +82,23 @@
   <% end %>
   </div>
 </div>
+
+<%= if @room[:timer] do %>
+<div class="timer">
+  <svg class="progress-ring" viewBox="0 0 85 85" width="100" height="100">
+    <circle
+      class="progress-ring__circle"
+      stroke="blue"
+      stroke-width="5"
+      fill="#fbfbfb"
+      cx="-50%"
+      cy="50%"
+      r="40"
+      style="stroke-dasharray: 251.32 251.32; stroke-dashoffset: <%= 251.32 * (@room[:timer].current_seconds * 100 / @room[:timer].total_seconds) / 100 %>;"
+    />
+    <text x="50%" y="65%" text-anchor="middle"><%= @room[:timer][:minutes] %>:<%= @room[:timer][:seconds] |> round() %></text>
+  </svg>
+</div>
+<% end %>
+
+<div class="timer-spacing"/>
