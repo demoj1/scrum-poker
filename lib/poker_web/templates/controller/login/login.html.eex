@@ -17,8 +17,10 @@ html, body, main {
 
 <div class="login-form">
     <h1>Simple scrum poker</h1>
-    <%= form_for @conn, "/", fn f -> %>
+    <%= form_for @conn, "/?room=#{assigns[:room]}", fn f -> %>
         Введите свое имя: <%= text_input f, :name %>
         <%= submit "Войти" %>
     <% end %>
+    <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
+    <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
 </div>

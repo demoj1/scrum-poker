@@ -11,7 +11,7 @@ defmodule PokerWeb.RoomLive do
       {:ok,
         socket
         |> put_flash(:info, "Для входа в комнату необходимо ввести свое имя")
-        |> redirect(to: "/?next=#{room}")
+        |> redirect(to: "/?room=#{room}")
       }
     else
       Coordinator.room_cast(:add_user_to_room, room, [session["user"]])

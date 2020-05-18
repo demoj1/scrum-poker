@@ -15,7 +15,7 @@ defmodule PokerWeb.Controller.Login do
     user = get_session(conn, :user)
 
     if user == nil do
-      render(conn, "login.html")
+      render(conn, "login.html", %{room: params["room"]})
     else
       conn
       |> redirect(to: "/ws")
@@ -23,18 +23,27 @@ defmodule PokerWeb.Controller.Login do
     end
   end
 
-  def logout(conn, params) do
+  def logout(conn, _params) do
     conn
     |> clear_session()
     |> redirect(to: "/")
   end
 
   def auth(conn, params) do
-    conn
-    |> put_session(:user, %{name: params["name"], id: System.unique_integer()})
-    |> put_status(302)
-    |> redirect(to: "/ws")
-    |> live_render(PokerWeb.PageLive)
-    # |> redirect(to: PokerWeb.Router.)
+    conn =
+      conn
+      |> put_session(:user, %{name: params["name"], id: System.unique_integer()})
+      |> put_status(302)
+
+    case params["room"] do
+      nil ->
+        conn
+        |> redirect(to: "/ws")
+        |> live_render(PokerWeb.PageLive)
+      room ->
+        conn
+        |> redirect(to: "/ws/#{room}")
+        |> live_render(PokerWeb.RoomLive)
+    end
   end
 end

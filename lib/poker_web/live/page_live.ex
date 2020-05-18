@@ -4,7 +4,7 @@ defmodule PokerWeb.PageLive do
   use PokerWeb, :live_view
 
   @impl true
-  def mount(params, session, socket) do
+  def mount(_params, session, socket) do
     if connected?(socket), do: PubSub.subscribe(Poker.PubSub, "rooms")
 
     rooms = Coordinator.get_room_list(session["user"])
