@@ -2,6 +2,7 @@ defmodule PokerWeb.RoomLive do
   alias Phoenix.PubSub
   alias Poker.Coordinator
   use PokerWeb, :live_view
+  import Phoenix.LiveView
 
   @impl true
   def mount(%{"room" => room}, session, socket) do
@@ -45,8 +46,8 @@ defmodule PokerWeb.RoomLive do
     room_id = room.room_id
     user = socket.assigns.user
 
-    if room.user_list[user][:vote] do
-      {:noreply, put_flash(socket, :error, "Невозможно изменить голос")}
+    if room[:open?] do
+      {:noreply, put_flash(socket, :error, "Невозможно изменить голос когда карты открыты")}
     else
       Coordinator.room_cast(:vote, room_id, [user, score])
       {:noreply, socket}
