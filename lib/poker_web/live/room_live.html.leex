@@ -2,21 +2,21 @@
   <h1 class="xs"><a href="/ws">Simple scrum poker</a></h1>
   <h1 class="sm"><a href="/ws">Ssp</a></h1>
   <div class="right-panel">
-    <h2 class="xs">Пользователь: </h2>
+    <h2 class="xs"><%= gettext "Пользователь:" %> </h2>
     <h2><%= assigns[:user].name %></h2>
-    <a href="/logout"a><button>Выйти</button></a>
+    <a href="/logout"a><button><%= gettext "Выйти" %></button></a>
   </div>
 </header>
 
 <div class="info-card">
-  <h3>Участников: <%= Enum.count(@room.user_list)%></h3>
+  <h3><%= gettext "Участников:" %> <%= Enum.count(@room.user_list)%></h3>
 </div>
 <hr/>
 
-<h2>Карты для оценки</h2>
+<h2><%= gettext "Карты для оценки" %></h2>
 <div class="deck">
   <%= for num <- [1, 2, 3, 5, 8, 13, 20, 40, 100, "❓"] do %>
-    <button class="card" title="Проголосовать" phx-click="select-card" phx-value-score="<%= num %>">
+    <button class="card" title="<%= gettext "Проголосовать" %>" phx-click="select-card" phx-value-score="<%= num %>">
       <%= num %>
     </button>
   <% end %>
@@ -25,23 +25,24 @@
 
 <%= if @user == @room.owner_id do %>
 <div class="action-panel">
-  <h4>Панель действий</h4>
+  <h4><%= gettext "Панель действий" %></h4>
   <div class="action-panel-buttons">
     <%= if @room[:open?] do %>
-      <button phx-click="close">Спрятать голоса</button>
+      <button phx-click="close"><%= gettext "Спрятать голоса" %></button>
     <% else %>
-      <button phx-click="open">Показать голоса</button>
+      <button phx-click="open"><%= gettext "Показать голоса" %></button>
     <% end %>
-    <button phx-click="reset-vote">Очистить голоса</button>
-    <button phx-click="stop-timer">Остановить таймер</button>
+    <button phx-click="reset-vote"><%= gettext "Очистить голоса" %></button>
+    <button phx-click="stop-timer"><%= gettext "Остановить таймер" %></button>
   </div>
 </div>
+<hr/>
 <div class="timer-panel">
-  <h4>Запустить таймер</h4>
+  <h4><%= gettext "Запустить таймер" %></h4>
   <div class="timer-panel-buttons">
     <%= for num <- [0.1, 1.0, 1.5, 2.0, 3.5, 5.0, 10.0, 15.0] do %>
       <button class="timer-btn" phx-click="start-timer" phx-value-minutes="<%= num %>">
-        <%= num %> мин.
+        <%= num %> <%= gettext "мин." %>
       </button>
     <% end %>
   </div>
@@ -50,11 +51,11 @@
 <% end %>
 
 <div class="list">
-  <h2>Проголосовал<%= if @user == @room.owner_id do %>, средний балл: <%= @avg_score %><% end %></h3>
+  <h2><%= gettext "Проголосовал" %><%= if @user == @room.owner_id do %>, <%= gettext "средний балл:" %> <%= @avg_score %><% end %></h3>
   <div class="user-list">
   <%= for {user, opts} <- @room.user_list, opts[:vote] != nil do %>
     <%= if @user == @room.owner_id do %>
-    <button class="user-card" title="Сбросить голос" phx-click="reset-user-vote" phx-value-user_id="<%= user.id %>">
+    <button class="user-card" title="<%= gettext "Сбросить голос" %>" phx-click="reset-user-vote" phx-value-user_id="<%= user.id %>">
     <% else %>
     <button class="user-card">
     <% end %>
@@ -70,7 +71,7 @@
 </div>
 
 <div class="list">
-  <h2>В процессе голосования</h3>
+  <h2><%= gettext "В процессе голосования" %></h3>
   <div class="user-list">
   <%= for {user, opts} <- @room.user_list, opts[:vote] == nil do %>
     <button class="user-card">

@@ -14,12 +14,16 @@ html, body, main {
 }
 </style>
 
+<div class="ln-container" style="float: right">
+    <a class="ru-ln" href="/?ln=ru">🇷🇺 RU</a>
+    <a class="en-ln" href="/?ln=en">🇺🇸 EN</a>
+</div>
 
 <div class="login-form">
     <h1>Simple scrum poker</h1>
-    <%= form_for @conn, "/?room=#{assigns[:room]}", fn f -> %>
-        Введите свое имя: <%= text_input f, :name %>
-        <%= submit "Войти" %>
+    <%= form_for @conn, "/?room=#{assigns[:room]}&ln=#{assigns[:ln]}", fn f -> %>
+        <%= gettext "Введите свое имя:" %> <%= text_input f, :name %>
+        <%= submit gettext("Войти") %>
     <% end %>
     <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
     <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>

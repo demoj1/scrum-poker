@@ -1,0 +1,152 @@
+## "msgid"s in this file come from POT (.pot) files.
+##
+## Do not add, change, or remove "msgid"s manually here as
+## they're tied to the ones in the corresponding POT file
+## (with the same domain).
+##
+## Use "mix gettext.extract --merge" or "mix gettext.merge"
+## to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: en\n"
+"Plural-Forms: nplurals=2\n"
+
+#, elixir-format
+#: lib/poker_web/templates/layout/root.html.leex:6
+msgid "Scrum poker - бесплатный сервис для оценки сложности задач в скрам командах."
+msgstr ""
+
+#, elixir-format
+#: lib/poker_web/templates/layout/root.html.leex:7
+msgid "Scrum, Скрам, Покер, Poker, Scrum poker, Скрам покер, online"
+msgstr ""
+
+#, elixir-format
+#: lib/poker_web/templates/layout/root.html.leex:2
+msgid "ru"
+msgstr "en"
+
+#, elixir-format
+#: lib/poker_web/templates/controller/login/login.html.eex:25
+msgid "Введите свое имя:"
+msgstr "Enter your name:"
+
+#, elixir-format
+#: lib/poker_web/templates/controller/login/login.html.eex:26
+msgid "Войти"
+msgstr "Login"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.html.leex:5
+msgid "Пользователь:"
+msgstr "User:"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.html.leex:74
+msgid "В процессе голосования"
+msgstr "Voting"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.html.leex:7
+msgid "Выйти"
+msgstr "Logout"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.html.leex:41
+msgid "Запустить таймер"
+msgstr "Start timer"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.html.leex:16
+msgid "Карты для оценки"
+msgstr "Cards"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.html.leex:36
+msgid "Остановить таймер"
+msgstr "Stop timer"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.html.leex:35
+msgid "Очистить голоса"
+msgstr "Clear votes"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.html.leex:28
+msgid "Панель действий"
+msgstr "Action panel"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.html.leex:33
+msgid "Показать голоса"
+msgstr "Show vote"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.html.leex:54
+msgid "Проголосовал"
+msgstr "Voted"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.html.leex:19
+msgid "Проголосовать"
+msgstr "Voted"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.html.leex:58
+msgid "Сбросить голос"
+msgstr "Reset vote"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.html.leex:31
+msgid "Спрятать голоса"
+msgstr "Hide votes"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.html.leex:12
+msgid "Участников:"
+msgstr "Participants:"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.html.leex:45
+msgid "мин."
+msgstr "min."
+
+#, elixir-format
+#: lib/poker_web/live/room_live.html.leex:54
+msgid "средний балл:"
+msgstr "avgerage score:"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.ex:14
+msgid "Для входа в комнату необходимо ввести свое имя"
+msgstr "For enter room, name must be set, please authorize"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.ex:162
+msgid "Карты закрыты"
+msgstr "Cards close"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.ex:154
+msgid "Карты открыты"
+msgstr "Cards open"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.ex:170
+msgid "Комната была закрыта в связи с бездействием"
+msgstr "The room is closed due to inactivity"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.ex:28
+msgid "Комната не существует"
+msgstr "Room not found"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.ex:52
+msgid "Невозможно изменить голос когда карты открыты"
+msgstr "You can't change your vote when the cards are open"
+
+#, elixir-format
+#: lib/poker_web/controllers/login.ex:40
+msgid "Имя не может быть длиннее 30 символов и короче 3-ех"
+msgstr "The name should be longer than 3 characters and shorter than 30"

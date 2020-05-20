@@ -2,6 +2,7 @@ defmodule PokerWeb.Controller.Login do
   use PokerWeb, :controller
   use Phoenix.Controller
   import Phoenix.LiveView.Controller
+  import Phoenix.Controller
 
   plug Plug.Session,
     store: :cookie,
@@ -13,13 +14,14 @@ defmodule PokerWeb.Controller.Login do
 
   def index(conn, params) do
     user = get_session(conn, :user)
+    ln = params["ln"] || "en"
+    Gettext.put_locale(PokerWeb.Gettext, ln)
 
     if user == nil do
-      render(conn, "login.html", %{room: params["room"]})
+      render(conn, "login.html", %{room: params["room"], ln: ln})
     else
       conn
       |> redirect(to: "/ws")
-      |> live_render(PokerWeb.PageLive)
     end
   end
 
@@ -30,20 +32,28 @@ defmodule PokerWeb.Controller.Login do
   end
 
   def auth(conn, params) do
+    ln = params["ln"] || "en"
+    Gettext.put_locale(PokerWeb.Gettext, ln)
+
+    if String.length(params["name"]) > 30 or String.length(params["name"]) < 3 do
+      conn
+      |> put_flash(:error, gettext "Имя не может быть длиннее 30 символов и короче 3-ех")
+      |> redirect(to: "/")
+    end
+
     conn =
       conn
-      |> put_session(:user, %{name: params["name"], id: System.unique_integer()})
+      |> put_session(:user, %{name: params["name"], id: System.unique_integer(), ln: ln})
       |> put_status(302)
 
     case params["room"] do
       nil ->
         conn
         |> redirect(to: "/ws")
-        |> live_render(PokerWeb.PageLive)
       room ->
         conn
         |> redirect(to: "/ws/#{room}")
-        |> live_render(PokerWeb.RoomLive)
+        # |> live_render(PokerWeb.RoomLive)
     end
   end
 end

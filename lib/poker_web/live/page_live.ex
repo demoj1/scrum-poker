@@ -10,7 +10,7 @@ defmodule PokerWeb.PageLive do
         {:ok,
           socket
           |> put_flash(:info, "Необходимо ввести свое имя")
-          |> redirect(to: "/ws")
+          |> redirect(to: "/")
         }
 
       user ->

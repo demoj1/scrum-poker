@@ -3,18 +3,20 @@ defmodule PokerWeb.RoomLive do
   alias Poker.Coordinator
   use PokerWeb, :live_view
   import Phoenix.LiveView
+  import PokerWeb.Gettext
 
-  @impl true
   def mount(%{"room" => room}, session, socket) do
     PubSub.subscribe(Poker.PubSub, "room:#{room}")
 
     if session["user"] == nil do
       {:ok,
         socket
-        |> put_flash(:info, "Для входа в комнату необходимо ввести свое имя")
+        |> put_flash(:info, gettext "Для входа в комнату необходимо ввести свое имя")
         |> redirect(to: "/?room=#{room}")
       }
     else
+      Gettext.put_locale(PokerWeb.Gettext, session["user"][:ln] || "en")
+
       Coordinator.room_cast(:add_user_to_room, room, [session["user"]])
       room = Coordinator.room_call(:room_info, room)
 
@@ -23,7 +25,7 @@ defmodule PokerWeb.RoomLive do
           {:ok,
             socket
             |> assign(user: session["user"])
-            |> put_flash(:error, "Комната не существует")
+            |> put_flash(:error, gettext "Комната не существует")
             |> redirect(to: "/ws")
           }
         room ->
@@ -47,7 +49,7 @@ defmodule PokerWeb.RoomLive do
     user = socket.assigns.user
 
     if room[:open?] do
-      {:noreply, put_flash(socket, :error, "Невозможно изменить голос когда карты открыты")}
+      {:noreply, put_flash(socket, :error, gettext "Невозможно изменить голос когда карты открыты")}
     else
       Coordinator.room_cast(:vote, room_id, [user, score])
       {:noreply, socket}
@@ -149,7 +151,7 @@ defmodule PokerWeb.RoomLive do
   def handle_info(:owner_open, socket) do
     {:noreply,
       socket
-      |> put_flash(:info, "Карты открыты")
+      |> put_flash(:info, gettext "Карты открыты")
     }
   end
 
@@ -157,7 +159,7 @@ defmodule PokerWeb.RoomLive do
   def handle_info(:owner_close, socket) do
     {:noreply,
       socket
-      |> put_flash(:info, "Карты закрыты")
+      |> put_flash(:info, gettext "Карты закрыты")
     }
   end
 
@@ -165,7 +167,7 @@ defmodule PokerWeb.RoomLive do
   def handle_info(:room_timeout, socket) do
     {:noreply,
       socket
-      |> put_flash(:info, "Комната была закрыта в связи с бездействием")
+      |> put_flash(:info, gettext "Комната была закрыта в связи с бездействием")
       |> redirect(to: "/ws")}
   end
 
