@@ -4,14 +4,6 @@ defmodule PokerWeb.Controller.Login do
   import Phoenix.LiveView.Controller
   import Phoenix.Controller
 
-  plug Plug.Session,
-    store: :cookie,
-    key: "_poker",
-    encryption_salt: "oPElUX9FoEVJkyddZwsBeCwApI9BYB7RmzH8et4m1MKOhEZ9uHGZsrq1hYIpwn9h",
-    signing_salt: "oPElUX9FoEVJkyddZwsBeCwApI9BYB7RmzH8et4m1MKOhEZ9uHGZsrq1hYIpwn9ht",
-    key_length: 64,
-    log: :debug
-
   def index(conn, params) do
     user = get_session(conn, :user)
     ln = params["ln"] || "en"

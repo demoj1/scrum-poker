@@ -101,15 +101,13 @@ button {
   font-size: 1.2em;
   border: 1px solid black;
   margin: 5px;
-  display: flex;
+  display: inline-block;
   min-width: 150px;
   text-align: center;
-  flex-direction: column;
   user-select: none;
   height: auto;
   align-items: center;
   text-transform: capitalize;
-  text-overflow: ellipsis;
 
   .user-vote {
     font-size: 2em;
@@ -118,6 +116,13 @@ button {
   .user-hidden-vote {
     font-size: 2em;
   }
+}
+
+.user-name {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  display: block;
 }
 
 .action-panel {

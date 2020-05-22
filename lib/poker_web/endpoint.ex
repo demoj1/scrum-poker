@@ -1,13 +1,14 @@
 defmodule PokerWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :poker
 
-  # The session will be stored in the cookie and signed,
-  # this means its contents can be read but not tampered with.
-  # Set :encryption_salt if you would also like to encrypt it.
   @session_options [
     store: :cookie,
-    key: "_poker_key",
-    signing_salt: "8BEbiRef"
+    key: "_poker_session_store",
+    encryption_salt: "oPElUX9FoEVJkyddZwsBeCwApI9BYB7RmzH8et4m1MKOhEZ9uHGZsrq1hYIpwn9h",
+    signing_salt: "oPElUX9FoEVJkyddZwsBeCwApI9BYB7RmzH8et4m1MKOhEZ9uHGZsrq1hYIpwn9ht",
+    key_length: 64,
+    log: :debug,
+    max_age: 4 * 7 * 24 * 60 * 60
   ]
 
   socket "/socket", PokerWeb.UserSocket,
@@ -16,18 +17,12 @@ defmodule PokerWeb.Endpoint do
 
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 
-  # Serve at "/" the static files from "priv/static" directory.
-  #
-  # You should set gzip to true if you are running phx.digest
-  # when deploying your static files in production.
   plug Plug.Static,
     at: "/",
     from: :poker,
     gzip: true,
     only: ~w(css fonts images js favicon.ico robots.txt sitemap.xml)
 
-  # Code reloading can be explicitly enabled under the
-  # :code_reloader configuration of your endpoint.
   if code_reloading? do
     socket "/phoenix/live_reload/socket", Phoenix.LiveReloader.Socket
     plug Phoenix.LiveReloader
