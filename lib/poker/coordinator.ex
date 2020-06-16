@@ -184,7 +184,7 @@ defmodule Poker.Room do
   def init({owner_id, room_id, room_name, room_opts}) do
     opts = Enum.into(room_opts, %{})
 
-    Process.send_after(self(), :timeout, 1000)
+    Process.send_after(self(), :timeout, 5000)
 
     {:ok, Map.merge(%{
       name: room_name,
@@ -352,7 +352,7 @@ defmodule Poker.Room do
       GenServer.call(Poker.Coordinator, {:room_timeout, state.room_id})
       {:stop, :normal, nil}
     else
-      send(self(), :timeout)
+      Process.send_after(self(), :timeout, 5000)
       {:noreply, state}
     end
   end
