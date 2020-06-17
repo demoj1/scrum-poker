@@ -140,6 +140,12 @@ defmodule PokerWeb.RoomLive do
   def handle_info({:update_room, room}, socket) do
     avg_score = room_avg_score(room)
 
+    room =
+      room
+      |> update_in([:user_list], &Enum.sort_by(&1, fn {_, meta} ->
+        (meta[:vote] || "0") |> Integer.parse(10)
+      end))
+
     {:noreply,
       socket
       |> assign(room: room)
