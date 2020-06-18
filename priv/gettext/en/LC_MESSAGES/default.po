@@ -42,7 +42,7 @@ msgid "Пользователь:"
 msgstr "User:"
 
 #, elixir-format
-#: lib/poker_web/live/room_live.html.leex:74
+#: lib/poker_web/live/room_live.html.leex:91
 msgid "В процессе голосования"
 msgstr "Voting"
 
@@ -82,7 +82,7 @@ msgid "Показать голоса"
 msgstr "Show vote"
 
 #, elixir-format
-#: lib/poker_web/live/room_live.html.leex:54
+#: lib/poker_web/live/room_live.html.leex:70
 msgid "Проголосовал"
 msgstr "Voted"
 
@@ -92,7 +92,7 @@ msgid "Проголосовать"
 msgstr "Voted"
 
 #, elixir-format
-#: lib/poker_web/live/room_live.html.leex:58
+#: lib/poker_web/live/room_live.html.leex:75
 msgid "Сбросить голос"
 msgstr "Reset vote"
 
@@ -112,7 +112,7 @@ msgid "мин."
 msgstr "min."
 
 #, elixir-format
-#: lib/poker_web/live/room_live.html.leex:54
+#: lib/poker_web/live/room_live.html.leex:57
 msgid "средний балл:"
 msgstr "avgerage score:"
 
@@ -122,17 +122,17 @@ msgid "Для входа в комнату необходимо ввести с�
 msgstr "For enter room, name must be set, please authorize"
 
 #, elixir-format
-#: lib/poker_web/live/room_live.ex:162
+#: lib/poker_web/live/room_live.ex:174
 msgid "Карты закрыты"
 msgstr "Cards close"
 
 #, elixir-format
-#: lib/poker_web/live/room_live.ex:154
+#: lib/poker_web/live/room_live.ex:166
 msgid "Карты открыты"
 msgstr "Cards open"
 
 #, elixir-format
-#: lib/poker_web/live/room_live.ex:170
+#: lib/poker_web/live/room_live.ex:182
 msgid "Комната была закрыта в связи с бездействием"
 msgstr "The room is closed due to inactivity"
 
@@ -147,6 +147,11 @@ msgid "Невозможно изменить голос когда карты о
 msgstr "You can't change your vote when the cards are open"
 
 #, elixir-format
-#: lib/poker_web/controllers/login.ex:40
+#: lib/poker_web/controllers/login.ex:32
 msgid "Имя не может быть длиннее 30 символов и короче 3-ех"
 msgstr "The name should be longer than 3 characters and shorter than 30"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.html.leex:56
+msgid "Статистика:"
+msgstr "Statistics:"

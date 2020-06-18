@@ -51,7 +51,24 @@
 <% end %>
 
 <div class="list">
-  <h2><%= gettext "Проголосовал" %><%= if @user == @room.owner_id do %>, <%= gettext "средний балл:" %> <%= @avg_score %><% end %></h3>
+  <%= if @user == @room.owner_id or @room[:open?] do %>
+    <div class="statistic">
+      <h2><%= gettext "Статистика:" %></h2>
+      <h3><%= gettext "средний балл:" %> <%= @avg_score %></h3>
+
+      <h3>score - count points:</h3>
+      <ul>
+      <%= for {score, count} <- (assigns[:count_in_group] || []), score != nil do %>
+        <li>
+          <%= score %> - <%= count %>
+        </li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <h2><%= gettext "Проголосовал" %></h2>
+
   <div class="user-list">
   <%= for {user, opts} <- @room.user_list, opts[:vote] != nil do %>
     <%= if @user == @room.owner_id do %>

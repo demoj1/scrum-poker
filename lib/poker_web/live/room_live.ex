@@ -143,11 +143,19 @@ defmodule PokerWeb.RoomLive do
     room =
       room
       |> update_in([:user_list], &Enum.sort_by(&1, fn {_, meta} ->
-        (meta[:vote] || "0") |> Integer.parse(10)
+        Integer.parse(meta[:vote] || "0", 10)
       end))
+
+    count_in_group =
+      (room[:user_list] || [])
+      |> Enum.group_by(fn {_, meta} -> meta[:vote] end)
+      |> Enum.map(fn {g, l} -> {g, Enum.count(l)} end)
+
+    IO.inspect(count_in_group)
 
     {:noreply,
       socket
+      |> assign(count_in_group: count_in_group)
       |> assign(room: room)
       |> assign(avg_score: avg_score)
     }
