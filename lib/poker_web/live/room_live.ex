@@ -151,8 +151,6 @@ defmodule PokerWeb.RoomLive do
       |> Enum.group_by(fn {_, meta} -> meta[:vote] end)
       |> Enum.map(fn {g, l} -> {g, Enum.count(l)} end)
 
-    IO.inspect(count_in_group)
-
     {:noreply,
       socket
       |> assign(count_in_group: count_in_group)

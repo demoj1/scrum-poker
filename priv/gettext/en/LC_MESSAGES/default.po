@@ -114,7 +114,7 @@ msgstr "min."
 #, elixir-format
 #: lib/poker_web/live/room_live.html.leex:57
 msgid "средний балл:"
-msgstr "avgerage score:"
+msgstr "average score:"
 
 #, elixir-format
 #: lib/poker_web/live/room_live.ex:14

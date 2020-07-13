@@ -59,9 +59,7 @@
       <h3>score - count points:</h3>
       <ul>
       <%= for {score, count} <- (assigns[:count_in_group] || []), score != nil do %>
-        <li>
-          <%= score %> - <%= count %>
-        </li>
+          <%= score %> - <%= count %> |
       <% end %>
       </ul>
     </div>
