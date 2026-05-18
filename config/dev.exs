@@ -14,6 +14,7 @@ config :poker, PokerWeb.Endpoint,
   server: true,
   watchers: [
     node: [
+      "--openssl-legacy-provider",
       "node_modules/webpack/bin/webpack.js",
       "--mode",
       "development",

@@ -40,6 +40,7 @@ defmodule Poker.MixProject do
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
+      {:plug_crypto, "~> 1.2"},
       {:plug_cowboy, "~> 2.0"},
       {:logger_file_backend, "~> 0.0.10"},
     ]

@@ -1,49 +1,30 @@
-FROM elixir:1.10.3-alpine AS build
+FROM elixir:1.18.3
 
-# install build dependencies
-RUN apk add --no-cache build-base npm git python
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends build-essential git curl ca-certificates python-is-python3 nodejs npm \
+    && npm install -g yarn@1.22.22 \
+    && rm -rf /var/lib/apt/lists/*
 
-# prepare build dir
 WORKDIR /app
 
-# install hex + rebar
+ENV MIX_ENV=dev
+
 RUN mix local.hex --force && \
     mix local.rebar --force
 
-# set build ENV
-ENV MIX_ENV=prod
-
-# install mix dependencies
 COPY mix.exs mix.lock ./
 COPY config config
-RUN mix do deps.get, deps.compile
+RUN mix deps.get
 
-# build assets
-COPY assets/package.json assets/package-lock.json ./assets/
-RUN npm --prefix ./assets ci --progress=false --no-audit --loglevel=error
+COPY assets/package.json assets/yarn.lock ./assets/
+RUN yarn --cwd ./assets install --frozen-lockfile
 
 COPY priv priv
 COPY assets assets
-RUN npm run --prefix ./assets deploy
-RUN mix phx.digest
-
-# compile and build release
 COPY lib lib
 
-RUN mix do compile, release
+RUN yarn --cwd ./assets deploy
 
-# prepare release image
-# FROM alpine:3.9 AS poker
-# RUN apk add --no-cache openssl ncurses-libs
+EXPOSE 4005
 
-# WORKDIR /app
-
-# RUN chown nobody:nobody /app
-
-# USER nobody:nobody
-
-# COPY --from=build --chown=nobody:nobody /app/_build/prod/rel/poker ./
-
-# ENV HOME=/app
-
-# CMD ["bin/poker", "start"]
+CMD ["mix", "phx.server"]
