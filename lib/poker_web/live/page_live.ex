@@ -1,6 +1,5 @@
 defmodule PokerWeb.PageLive do
   alias Poker.Coordinator
-  alias Phoenix.PubSub
   use PokerWeb, :live_view
 
   @impl true

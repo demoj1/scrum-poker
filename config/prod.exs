@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 config :poker, PokerWeb.Endpoint,
   http: [ip: {0, 0, 0, 0}, port: 4005],

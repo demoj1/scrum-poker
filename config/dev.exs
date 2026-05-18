@@ -1,4 +1,22 @@
-use Mix.Config
+import Config
+
+reload_enabled = System.get_env("POKER_DISABLE_RELOAD") != "1"
+
+watchers =
+  if reload_enabled do
+    [
+      node: [
+        "node_modules/webpack/bin/webpack.js",
+        "--mode",
+        "development",
+        "--watch-stdin",
+        cd: Path.expand("../assets", __DIR__),
+        env: [{"NODE_OPTIONS", "--openssl-legacy-provider"}]
+      ]
+    ]
+  else
+    []
+  end
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
@@ -9,19 +27,10 @@ use Mix.Config
 config :poker, PokerWeb.Endpoint,
   http: [ip: {0, 0, 0, 0}, port: 4005],
   debug_errors: true,
-  code_reloader: true,
+  code_reloader: reload_enabled,
   check_origin: false,
   server: true,
-  watchers: [
-    node: [
-      "--openssl-legacy-provider",
-      "node_modules/webpack/bin/webpack.js",
-      "--mode",
-      "development",
-      "--watch-stdin",
-      cd: Path.expand("../assets", __DIR__)
-    ]
-  ]
+  watchers: watchers
 
 # ## SSL Support
 #
@@ -47,18 +56,23 @@ config :poker, PokerWeb.Endpoint,
 # configured to run both http and https servers on
 # different ports.
 
-# Watch static and templates for browser reloading.
-config :poker, PokerWeb.Endpoint,
-  live_reload: [
-    patterns: [
-      ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
-      ~r"priv/gettext/.*(po)$",
-      ~r"lib/poker_web/(live|views)/.*(ex)$",
-      ~r"lib/poker_web/templates/.*(eex)$"
+if reload_enabled do
+  # Watch static and templates for browser reloading.
+  config :poker, PokerWeb.Endpoint,
+    live_reload: [
+      patterns: [
+        ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
+        ~r"priv/gettext/.*(po)$",
+        ~r"lib/poker_web/(live|views)/.*(ex)$",
+        ~r"lib/poker_web/templates/.*(eex)$"
+      ]
     ]
-  ]
+end
 
 # Do not include metadata nor timestamps in development logs
+config :logger,
+  level: :info
+
 config :logger, :console, format: "[$level] $message\n"
 
 # Set a higher stacktrace during development. Avoid configuring such

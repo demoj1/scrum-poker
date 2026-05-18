@@ -1,8 +1,5 @@
 defmodule PokerWeb.Controller.Login do
   use PokerWeb, :controller
-  use Phoenix.Controller
-  import Phoenix.LiveView.Controller
-  import Phoenix.Controller
 
   def index(conn, params) do
     user = get_session(conn, :user)

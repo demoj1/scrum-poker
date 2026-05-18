@@ -4,7 +4,7 @@
   <div class="right-panel">
     <h2 class="xs">Пользователь: </h2>
     <h2><%= assigns[:user].name %></h2>
-    <a href="/logout"a><button>Выйти</button></a>
+    <a href="/logout"><button>Выйти</button></a>
   </div>
 </header>
 
@@ -21,7 +21,7 @@
       <%= for {room_id, %{name: name, users: users} = opts} <- @room_list do %>
         <a href="/ws/<%= room_id %>">
           <%= if opts[:owner] == @user do%>
-            <%# <b>x</b> %>
+            <% # <b>x</b> %>
           <% end %>
           <strong><%= name %><br/></strong>
           Участников: <%= Enum.count(users) %>

@@ -5,6 +5,7 @@ defmodule PokerWeb.RoomLive do
   import Phoenix.LiveView
   import PokerWeb.Gettext
 
+  @impl true
   def mount(%{"room" => room}, session, socket) do
     PubSub.subscribe(Poker.PubSub, "room:#{room}")
 
