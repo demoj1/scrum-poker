@@ -2,19 +2,90 @@
 
 # Poker
 
-To start your Phoenix server:
+Phoenix/LiveView приложение для scrum poker.
 
-  * Setup the project with `mix setup`
-  * Start Phoenix endpoint with `mix phx.server`
+## Требования
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+- `elixir`
+- `mix`
+- `yarn`
+- `docker` только если нужен запуск через контейнер
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+## Основной запуск
 
-## Learn more
+Рекомендуемый способ локального запуска:
 
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+```bash
+./run-local.sh
+```
+
+Что делает скрипт:
+
+- проверяет наличие `mix` и `yarn`
+- подтягивает `mix`-зависимости
+- подтягивает frontend-зависимости через `yarn`
+- собирает ассеты
+- запускает Phoenix сервер
+
+После запуска приложение доступно по адресу:
+
+```text
+http://localhost:4005
+```
+
+## Скрипты
+
+### `./run-local.sh`
+
+Тихий локальный запуск проекта.
+
+Используй его, если хочешь просто поднять приложение без лишнего шума в консоли.
+
+### `./run-docker.sh`
+
+Сборка Docker-образа и запуск приложения в контейнере:
+
+```bash
+./run-docker.sh
+```
+
+Скрипт:
+
+- собирает образ `scrum-poker-local`
+- удаляет старый контейнер с тем же именем, если он есть
+- запускает приложение с пробросом порта `4005:4005`
+
+Если `docker` не установлен, скрипт завершится с понятным сообщением.
+
+### `./build.sh`
+
+Старый служебный скрипт для сборки release-артефакта через Docker.
+
+Он:
+
+- собирает образ `poker`
+- создаёт временный контейнер
+- копирует из него release в локальную папку `./app`
+
+Используй только если тебе нужен именно release-артефакт, а не обычный локальный запуск.
+
+## Ручной запуск
+
+Если по какой-то причине нужен запуск руками:
+
+```bash
+mix deps.get
+yarn --cwd assets install --frozen-lockfile
+yarn --cwd assets deploy
+mix phx.server
+```
+
+Но предпочтительный способ всё равно `./run-local.sh`.
+
+## Dockerfile
+
+В репозитории есть `Dockerfile`, который позволяет поднять приложение в контейнере через `./run-docker.sh`.
+
+## Примечание
+
+Проект использует старый Phoenix/LiveView стек, поэтому при прямом запуске через `mix phx.server` возможны лишние предупреждения от зависимостей. `./run-local.sh` специально настроен так, чтобы локальный запуск был чище.
