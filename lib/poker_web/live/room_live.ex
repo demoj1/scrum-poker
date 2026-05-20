@@ -16,7 +16,7 @@ defmodule PokerWeb.RoomLive do
         |> redirect(to: "/?room=#{room}")
       }
     else
-      Gettext.put_locale(PokerWeb.Gettext, session["user"][:ln] || "ru")
+      Gettext.put_locale(PokerWeb.Gettext, "ru")
 
       Coordinator.room_cast(:add_user_to_room, room, [session["user"]])
       room = Coordinator.room_call(:room_info, room)

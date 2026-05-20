@@ -5,6 +5,7 @@ defmodule PokerWeb.PageLive do
 
   @impl true
   def mount(_params, session, socket) do
+    Gettext.put_locale(PokerWeb.Gettext, "ru")
     PubSub.subscribe(Poker.PubSub, "rooms")
 
     case session["user"] do

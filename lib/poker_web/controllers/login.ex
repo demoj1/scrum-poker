@@ -3,7 +3,7 @@ defmodule PokerWeb.Controller.Login do
 
   def index(conn, params) do
     user = get_session(conn, :user)
-    ln = params["ln"] || "ru"
+    ln = "ru"
     Gettext.put_locale(PokerWeb.Gettext, ln)
 
     if user == nil do
@@ -21,7 +21,7 @@ defmodule PokerWeb.Controller.Login do
   end
 
   def auth(conn, params) do
-    ln = params["ln"] || "ru"
+    ln = "ru"
     Gettext.put_locale(PokerWeb.Gettext, ln)
 
     if String.length(params["name"]) > 30 or String.length(params["name"]) < 3 do
