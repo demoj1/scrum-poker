@@ -143,8 +143,8 @@ defmodule PokerWeb.RoomLive do
 
     room =
       room
-      |> update_in([:user_list], &Enum.sort_by(&1, fn {_, meta} ->
-        Integer.parse(meta[:vote] || "0", 10)
+      |> update_in([:user_list], &Enum.sort_by(&1, fn {user, _meta} ->
+        :erlang.phash2(user.name || "")
       end))
 
     count_in_group =
