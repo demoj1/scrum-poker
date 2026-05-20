@@ -80,12 +80,13 @@ defmodule Poker.Coordinator do
   def handle_call({:create_room, owner_id, room_opts}, _from, state) do
     room_id = :crypto.strong_rand_bytes(64) |> Base.url_encode64 |> binary_part(0, 64)
     room_name = room_opts[:name] || NameGenerator.get_name
+    room_owner_name = owner_id[:name]
 
     {:ok, pid} = GenServer.start_link(Poker.Room, {
       owner_id,
       room_id,
       room_name,
-      [user_list: %{owner_id => %{}}]
+      [user_list: %{owner_id => %{}}, owner_name: room_owner_name]
     }, name: room_id |> String.to_atom())
 
     new_state = put_in(state, [:rooms, room_id], %{
@@ -190,6 +191,7 @@ defmodule Poker.Room do
       name: room_name,
       room_id: room_id,
       owner_id: owner_id,
+      owner_name: opts[:owner_name] || owner_id[:name],
       open?: false,
       user_list: %{},
       updated: DateTime.utc_now()

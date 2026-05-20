@@ -20,10 +20,10 @@ html, body, main {
 </div>
 
 <div class="login-form">
-    <h1>Simple scrum poker</h1>
+    <h1>Simple Scrum Poker</h1>
     <%= form_for @conn, "/?room=#{assigns[:room]}&ln=#{assigns[:ln]}", fn f -> %>
         <%= gettext "Введите свое имя:" %> <%= text_input f, :name %>
-        <%= submit gettext("Войти") %>
+        <%= submit gettext("Войти"), [title: "Войти в приложение с указанным именем"] %>
     <% end %>
     <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
     <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>

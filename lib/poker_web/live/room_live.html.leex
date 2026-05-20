@@ -1,10 +1,10 @@
 <header>
-  <h1 class="xs"><a href="/ws">Simple scrum poker</a></h1>
-  <h1 class="sm"><a href="/ws">Ssp</a></h1>
+  <h1 class="xs"><a href="/ws">Simple Scrum Poker</a></h1>
+  <h1 class="sm"><a href="/ws">СП</a></h1>
   <div class="right-panel">
     <h2 class="xs"><%= gettext "Пользователь:" %> </h2>
     <h2><%= assigns[:user].name %></h2>
-    <a href="/logout"><button><%= gettext "Выйти" %></button></a>
+    <a href="/logout"><button title="Выйти из текущей сессии"><%= gettext "Выйти" %></button></a>
   </div>
 </header>
 
@@ -28,12 +28,12 @@
   <h4><%= gettext "Панель действий" %></h4>
   <div class="action-panel-buttons">
     <%= if @room[:open?] do %>
-      <button phx-click="close"><%= gettext "Спрятать голоса" %></button>
+      <button title="Скрыть все выбранные оценки участников" phx-click="close"><%= gettext "Спрятать голоса" %></button>
     <% else %>
-      <button phx-click="open"><%= gettext "Показать голоса" %></button>
+      <button title="Показать все выбранные оценки участников" phx-click="open"><%= gettext "Показать голоса" %></button>
     <% end %>
-    <button phx-click="reset-vote"><%= gettext "Очистить голоса" %></button>
-    <button phx-click="stop-timer"><%= gettext "Остановить таймер" %></button>
+    <button title="Очистить оценки у всех участников и начать новый раунд" phx-click="reset-vote"><%= gettext "Очистить голоса" %></button>
+    <button title="Остановить текущий таймер" phx-click="stop-timer"><%= gettext "Остановить таймер" %></button>
   </div>
 </div>
 <hr/>
@@ -41,7 +41,7 @@
   <h4><%= gettext "Запустить таймер" %></h4>
   <div class="timer-panel-buttons">
     <%= for num <- [0.1, 1.0, 1.5, 2.0, 3.5, 5.0, 10.0, 15.0] do %>
-      <button class="timer-btn" phx-click="start-timer" phx-value-minutes="<%= num %>">
+      <button class="timer-btn" title="Запустить таймер на <%= num %> мин." phx-click="start-timer" phx-value-minutes="<%= num %>">
         <%= num %> <%= gettext "мин." %>
       </button>
     <% end %>
@@ -56,7 +56,7 @@
       <h2><%= gettext "Статистика:" %></h2>
       <h3><%= gettext "средний балл:" %> <%= @avg_score %></h3>
 
-      <h3>score - count points:</h3>
+      <h3>Оценка - количество голосов:</h3>
       <ul>
       <%= for {score, count} <- (assigns[:count_in_group] || []), score != nil do %>
           <%= score %> - <%= count %> |
@@ -70,9 +70,9 @@
   <div class="user-list">
   <%= for {user, opts} <- @room.user_list, opts[:vote] != nil do %>
     <%= if @user == @room.owner_id do %>
-    <button class="user-card" title="<%= gettext "Сбросить голос" %>" phx-click="reset-user-vote" phx-value-user_id="<%= user.id %>">
+    <button class="user-card" title="Сбросить голос этого участника" phx-click="reset-user-vote" phx-value-user_id="<%= user.id %>">
     <% else %>
-    <button class="user-card">
+    <button class="user-card" title="Показать карточку участника">
     <% end %>
       <span class="user-name"><%= user.name %></span>
       <%= if @room[:open?] or opts[:open?] do %>
@@ -89,7 +89,7 @@
   <h2><%= gettext "В процессе голосования" %></h3>
   <div class="user-list">
   <%= for {user, opts} <- @room.user_list, opts[:vote] == nil do %>
-    <button class="user-card">
+    <button class="user-card" title="Участник еще не проголосовал">
       <span class="user-name"><%= user.name %></span>
       <span class="user-hidden-vote">?</span>
     </button>
@@ -116,3 +116,15 @@
 <% end %>
 
 <div class="timer-spacing"/>
+
+<%= if @user == @room.owner_id do %>
+  <div class="list">
+    <h3><%= gettext "Памятка для администратора комнаты" %></h3>
+    <p><%= gettext "1. Перед раундом убедитесь, что оценки очищены: нажмите \"Очистить голоса\", чтобы все участники начали заново." %></p>
+    <p><%= gettext "2. Во время обсуждения участники выбирают карты. До открытия голосов оценки скрыты, поэтому никто не влияет на выбор других." %></p>
+    <p><%= gettext "3. Когда все готовы, нажмите \"Показать голоса\". После просмотра можно снова скрыть оценки кнопкой \"Спрятать голоса\"." %></p>
+    <p><%= gettext "4. Если участник ошибся или передумал, нажмите на его карточку в блоке \"Проголосовал\" - его голос будет сброшен." %></p>
+    <p><%= gettext "5. Для ограничения времени используйте блок таймера: выберите длительность, при необходимости остановите таймер досрочно." %></p>
+    <p><%= gettext "6. Ориентируйтесь на статистику: средний балл и распределение оценок помогают быстро выявить спорные задачи." %></p>
+  </div>
+<% end %>

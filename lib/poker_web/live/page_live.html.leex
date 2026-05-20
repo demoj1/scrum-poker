@@ -1,16 +1,16 @@
 <header>
-  <h1 class="xs"><a href="/ws">Simple scrum poker</a></h1>
-  <h1 class="sm"><a href="/ws">Ssp</a></h1>
+  <h1 class="xs"><a href="/ws">Simple Scrum Poker</a></h1>
+  <h1 class="sm"><a href="/ws">СП</a></h1>
   <div class="right-panel">
     <h2 class="xs">Пользователь: </h2>
     <h2><%= assigns[:user].name %></h2>
-    <a href="/logout"><button>Выйти</button></a>
+    <a href="/logout"><button title="Выйти из текущей сессии">Выйти</button></a>
   </div>
 </header>
 
 <%= if assigns[:user] != nil do %>
   <form phx-submit="create">
-    <button type="submit">Создать новую комнату</button>
+    <button type="submit" title="Создать новую комнату и сразу перейти в нее">Создать новую комнату</button>
   </form>
 
   <section>
@@ -19,7 +19,7 @@
     <%= if Enum.count(@room_list) > 0 do %>
       <div class="room-list">
       <%= for {room_id, %{name: name, users: users} = opts} <- @room_list do %>
-        <a href="/ws/<%= room_id %>">
+        <a href="/ws/<%= room_id %>" title="Открыть комнату и перейти к голосованию">
           <%= if opts[:owner] == @user do%>
             <% # <b>x</b> %>
           <% end %>

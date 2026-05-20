@@ -16,7 +16,7 @@ defmodule PokerWeb.RoomLive do
         |> redirect(to: "/?room=#{room}")
       }
     else
-      Gettext.put_locale(PokerWeb.Gettext, session["user"][:ln] || "en")
+      Gettext.put_locale(PokerWeb.Gettext, session["user"][:ln] || "ru")
 
       Coordinator.room_cast(:add_user_to_room, room, [session["user"]])
       room = Coordinator.room_call(:room_info, room)
@@ -30,13 +30,14 @@ defmodule PokerWeb.RoomLive do
             |> redirect(to: "/ws")
           }
         room ->
+          user = room_owner_user(room, session["user"])
           avg_score = room_avg_score(room)
 
           {:ok,
             socket
             |> assign(room: room)
             |> assign(avg_score: avg_score)
-            |> assign(user: session["user"])
+            |> assign(user: user)
           }
       end
     end
@@ -59,22 +60,26 @@ defmodule PokerWeb.RoomLive do
 
   @impl true
   def handle_event("open", _params, socket) do
-    room_id = socket.assigns.room.room_id
+    room = socket.assigns.room
 
-    Coordinator.room_cast(:change_card_visibility, room_id, [true])
-
-    Phoenix.PubSub.broadcast!(Poker.PubSub, "room:#{room_id}", :owner_open)
+    if owner?(room, socket.assigns.user) do
+      room_id = room.room_id
+      Coordinator.room_cast(:change_card_visibility, room_id, [true])
+      Phoenix.PubSub.broadcast!(Poker.PubSub, "room:#{room_id}", :owner_open)
+    end
 
     {:noreply, socket}
   end
 
   @impl true
   def handle_event("close", _params, socket) do
-    room_id = socket.assigns.room.room_id
+    room = socket.assigns.room
 
-    Coordinator.room_cast(:change_card_visibility, room_id, [false])
-
-    Phoenix.PubSub.broadcast!(Poker.PubSub, "room:#{room_id}", :owner_close)
+    if owner?(room, socket.assigns.user) do
+      room_id = room.room_id
+      Coordinator.room_cast(:change_card_visibility, room_id, [false])
+      Phoenix.PubSub.broadcast!(Poker.PubSub, "room:#{room_id}", :owner_close)
+    end
 
     {:noreply, socket}
   end
@@ -93,19 +98,24 @@ defmodule PokerWeb.RoomLive do
 
   @impl true
   def handle_event("start-timer", %{"minutes" => minutes}, socket) do
-    room_id = socket.assigns.room.room_id
-    seconds = String.to_float(minutes) * 60
+    room = socket.assigns.room
 
-    Coordinator.room_cast(:start_timer, room_id, [seconds])
+    if owner?(room, socket.assigns.user) do
+      room_id = room.room_id
+      seconds = String.to_float(minutes) * 60
+      Coordinator.room_cast(:start_timer, room_id, [seconds])
+    end
 
     {:noreply, socket}
   end
 
   @impl true
   def handle_event("reset-vote", _params, socket) do
-    room_id = socket.assigns.room.room_id
+    room = socket.assigns.room
 
-    Coordinator.room_cast(:reset_vote, room_id)
+    if owner?(room, socket.assigns.user) do
+      Coordinator.room_cast(:reset_vote, room.room_id)
+    end
 
     {:noreply, socket}
   end
@@ -114,25 +124,26 @@ defmodule PokerWeb.RoomLive do
   def handle_event("reset-user-vote", %{"user_id" => user_id}, socket) do
     user_id = String.to_integer(user_id)
     room = socket.assigns.room
-    room_id = room.room_id
 
-    user = room.user_list |> Enum.find_value(fn
-      {%{id: ^user_id} = user, _} -> user
-      _ -> nil
-    end)
+    if owner?(room, socket.assigns.user) do
+      user = room.user_list |> Enum.find_value(fn
+        {%{id: ^user_id} = user, _} -> user
+        _ -> nil
+      end)
 
-    IO.inspect({user_id, room, user})
-
-    Coordinator.room_cast(:reset_user_vote, room_id, [user])
+      Coordinator.room_cast(:reset_user_vote, room.room_id, [user])
+    end
 
     {:noreply, socket}
   end
 
   @impl true
   def handle_event("stop-timer", _params, socket) do
-    room_id = socket.assigns.room.room_id
+    room = socket.assigns.room
 
-    Coordinator.room_cast(:stop_timer, room_id)
+    if owner?(room, socket.assigns.user) do
+      Coordinator.room_cast(:stop_timer, room.room_id)
+    end
 
     {:noreply, socket}
   end
@@ -199,5 +210,17 @@ defmodule PokerWeb.RoomLive do
       |> Enum.sum()
 
     (is_nil(sum_points) || count_vote == 0) && "---" || Float.round(sum_points / count_vote, 2)
+  end
+
+  defp owner?(room, user) do
+    room.owner_id == user or room.owner_name == user[:name]
+  end
+
+  defp room_owner_user(room, user) do
+    if room.owner_name == user[:name] do
+      Map.put(room.owner_id, :ln, user[:ln])
+    else
+      user
+    end
   end
 end
