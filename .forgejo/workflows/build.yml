@@ -1,0 +1,70 @@
+name: build
+
+# Сборка образа и выкатка в Docker Swarm (стек scrum-poker, infra/swarm).
+# Стек берёт latest, Portainer перекачивает его по вебхуку.
+on:
+  push:
+    branches: [master]
+  workflow_dispatch: {}
+
+env:
+  REGISTRY: vc.xt-xarid.uz
+  IMAGE: vc.xt-xarid.uz/infra/scrum-poker
+
+jobs:
+  build:
+    runs-on: infra-build
+    steps:
+      - name: Checkout
+        # В образе раннера (docker:27-cli) нет Node.js — actions/checkout не запустится
+        run: |
+          apk add --no-cache git
+          SERVER="${{ github.server_url }}"
+          git init -q
+          git remote add origin "${SERVER%%://*}://x-access-token:${{ github.token }}@${SERVER#*://}/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.ref_name }}"
+          git checkout -q FETCH_HEAD
+
+      - name: Подключить docker CLI к DinD
+        run: |
+          GW=$(ip route | awk '/default/{print $3; exit}')
+          [ -n "$GW" ] || { echo "не удалось определить шлюз джобы"; exit 1; }
+          echo "DOCKER_HOST=tcp://$GW:2375" >> "$GITHUB_ENV"
+          DOCKER_HOST="tcp://$GW:2375" docker version --format 'docker {{.Server.Version}}'
+
+      - name: Сборка
+        run: docker build --pull -t "$IMAGE:sha-${{ github.sha }}" -t "$IMAGE:latest" .
+
+      - name: Проверка запуска без сети
+        # mix phx.server компилирует проект при старте, отсюда долгий цикл ожидания
+        run: |
+          docker rm -f scrum-poker-smoke >/dev/null 2>&1 || true
+          docker run -d --name scrum-poker-smoke --network none -e POKER_DISABLE_RELOAD=1 "$IMAGE:sha-${{ github.sha }}"
+          ok=
+          for i in $(seq 1 60); do
+            if docker exec scrum-poker-smoke curl -fsS -o /dev/null http://127.0.0.1:4005/ 2>/dev/null; then ok=1; break; fi
+            sleep 5
+          done
+          docker logs --tail 20 scrum-poker-smoke 2>&1
+          docker rm -f scrum-poker-smoke >/dev/null
+          [ -n "$ok" ] || { echo "приложение не поднялось: :4005 не отвечает"; exit 1; }
+          echo "приложение отвечает на :4005"
+
+      - name: Публикация в реестр
+        if: github.ref_name == 'master'
+        env:
+          REG_PASS: ${{ secrets.CI_BOT_TOKEN }}
+        run: |
+          echo "$REG_PASS" | docker login "$REGISTRY" -u ci-infra --password-stdin
+          docker push "$IMAGE:sha-${{ github.sha }}"
+          docker push "$IMAGE:latest"
+
+      - name: Выкатка в Swarm
+        # Пока секрета нет — сервис ещё не переведён в Swarm, шаг пропускается
+        if: github.ref_name == 'master'
+        env:
+          HOOK: ${{ secrets.PORTAINER_WEBHOOK_URL }}
+        run: |
+          if [ -z "$HOOK" ]; then echo "PORTAINER_WEBHOOK_URL не задан — выкатка пропущена"; exit 0; fi
+          apk add --no-cache curl >/dev/null
+          curl -fsS -k -X POST "$HOOK" -o /dev/null -w 'Portainer: %{http_code}\n'
