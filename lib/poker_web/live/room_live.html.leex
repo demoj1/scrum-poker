@@ -2,15 +2,10 @@
 <header>
   <h1 class="xs"><a href="/ws">Simple Scrum Poker</a></h1>
   <h1 class="sm"><a href="/ws">СП</a></h1>
-  <div class="header-center">
-    <%= if @adult? do %>
-      <button class="btn-adult" phx-click="toggle-adult"><%= gettext "Выключить режим 18+" %></button>
-    <% else %>
-      <%= if @vote_sum > 18 do %>
-        <button class="btn-adult btn-adult--blink" title="<%= gettext "Сумма голосов больше 18" %>" phx-click="toggle-adult"><%= gettext "Включить режим 18+" %></button>
-      <% end %>
-    <% end %>
-  </div>
+<%= if @adult? or @vote_sum > 18 do %>
+  <button class="adult-peek <%= if @adult?, do: "is-on" %>" phx-click="toggle-adult"
+    title="<%= if @adult?, do: gettext("Выключить режим 18+"), else: gettext("Включить режим 18+") %>">18+</button>
+<% end %>
   <div class="right-panel">
     <h2 class="xs"><%= gettext "Пользователь:" %> </h2>
     <h2><%= assigns[:user].name %></h2>

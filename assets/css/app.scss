@@ -25,15 +25,6 @@ h1, h2, h3, h4 {
     background: transparent;
   }
 
-  .header-center {
-    flex: 1;
-    text-align: center;
-
-    button {
-      margin: 0;
-    }
-  }
-
   hr {
     margin: 0.8rem 0;
   }
@@ -535,24 +526,57 @@ header {
   padding: 4px 0;
 }
 
-.room .btn-adult {
-  background: $card-red;
-  border-color: $card-red;
+// наклейка торчит из левого верхнего угла и выезжает при наведении
+.room .adult-peek {
+  position: fixed;
+  top: -18px;
+  left: -18px;
+  z-index: 20;
+  width: 52px;
+  height: 52px;
+  margin: 0;
+  padding: 12px 0 0 12px;
+  border: 2px dashed rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  background: rgba(198, 40, 40, 0.55);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+  text-transform: none;
+  transform: rotate(-20deg);
+  transition: top 0.2s, left 0.2s, background 0.2s, transform 0.2s;
+  animation: adult-wiggle 4s ease-in-out infinite;
 
   &:hover,
   &:focus {
-    background: #8e0000;
-    border-color: #8e0000;
+    top: 4px;
+    left: 4px;
+    padding: 0;
+    background: $card-red;
+    border-color: #fff;
+    transform: rotate(0deg);
+    animation: none;
   }
 
-  &.btn-adult--blink {
-    animation: adult-blink 1s ease-in-out infinite;
+  &.is-on {
+    background: $card-red;
+    animation: none;
   }
 }
 
-@keyframes adult-blink {
-  50% {
-    box-shadow: 0 0 10px 4px rgba(198, 40, 40, 0.7);
+@keyframes adult-wiggle {
+  0%, 90%, 100% {
+    transform: rotate(-20deg);
+  }
+
+  93% {
+    transform: rotate(-8deg);
+  }
+
+  96% {
+    transform: rotate(-28deg);
   }
 }
 
