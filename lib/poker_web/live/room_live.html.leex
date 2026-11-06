@@ -1,3 +1,4 @@
+<div class="room">
 <header>
   <h1 class="xs"><a href="/ws">Simple Scrum Poker</a></h1>
   <h1 class="sm"><a href="/ws">СП</a></h1>
@@ -8,9 +9,7 @@
   </div>
 </header>
 
-<div class="info-card">
-  <h3><%= gettext "Участников:" %> <%= Enum.count(@room.user_list)%></h3>
-</div>
+<h3><%= gettext "Участников:" %> <%= Enum.count(@room.user_list)%></h3>
 <hr/>
 
 <h2><%= gettext "Карты для оценки" %></h2>
@@ -24,27 +23,28 @@
 <hr/>
 
 <%= if @user == @room.owner_id do %>
-<div class="action-panel">
-  <h4><%= gettext "Панель действий" %></h4>
-  <div class="action-panel-buttons">
-    <%= if @room[:open?] do %>
-      <button title="Скрыть все выбранные оценки участников" phx-click="close"><%= gettext "Спрятать голоса" %></button>
-    <% else %>
-      <button title="Показать все выбранные оценки участников" phx-click="open"><%= gettext "Показать голоса" %></button>
-    <% end %>
-    <button title="Очистить оценки у всех участников и начать новый раунд" phx-click="reset-vote"><%= gettext "Очистить голоса" %></button>
-    <button title="Остановить текущий таймер" phx-click="stop-timer"><%= gettext "Остановить таймер" %></button>
+<div class="owner-panels">
+  <div class="action-panel">
+    <h4><%= gettext "Панель действий" %></h4>
+    <div class="action-panel-buttons">
+      <%= if @room[:open?] do %>
+        <button title="Скрыть все выбранные оценки участников" phx-click="close"><%= gettext "Спрятать голоса" %></button>
+      <% else %>
+        <button title="Показать все выбранные оценки участников" phx-click="open"><%= gettext "Показать голоса" %></button>
+      <% end %>
+      <button title="Очистить оценки у всех участников и начать новый раунд" phx-click="reset-vote"><%= gettext "Очистить голоса" %></button>
+      <button title="Остановить текущий таймер" phx-click="stop-timer"><%= gettext "Остановить таймер" %></button>
+    </div>
   </div>
-</div>
-<hr/>
-<div class="timer-panel">
-  <h4><%= gettext "Запустить таймер" %></h4>
-  <div class="timer-panel-buttons">
-    <%= for num <- [0.1, 1.0, 1.5, 2.0, 3.5, 5.0, 10.0, 15.0] do %>
-      <button class="timer-btn" title="Запустить таймер на <%= num %> мин." phx-click="start-timer" phx-value-minutes="<%= num %>">
-        <%= num %> <%= gettext "мин." %>
-      </button>
-    <% end %>
+  <div class="timer-panel">
+    <h4><%= gettext "Запустить таймер" %></h4>
+    <div class="timer-panel-buttons">
+      <%= for num <- [0.1, 1.0, 1.5, 2.0, 3.5, 5.0, 10.0, 15.0] do %>
+        <button class="timer-btn" title="Запустить таймер на <%= num %> мин." phx-click="start-timer" phx-value-minutes="<%= num %>">
+          <%= num %> <%= gettext "мин." %>
+        </button>
+      <% end %>
+    </div>
   </div>
 </div>
 <hr/>
@@ -52,17 +52,13 @@
 
 <div class="list">
   <%= if @user == @room.owner_id or @room[:open?] do %>
-    <div class="statistic">
-      <h2><%= gettext "Статистика:" %></h2>
-      <h3><%= gettext "средний балл:" %> <%= @avg_score %></h3>
-
-      <h3>Оценка - количество голосов:</h3>
-      <ul>
+    <p class="statistic">
+      <b><%= gettext "Статистика:" %></b>
+      <%= gettext "средний балл:" %> <%= @avg_score %> ·
       <%= for {score, count} <- (assigns[:count_in_group] || []), score != nil do %>
-          <%= score %> - <%= count %> |
+        <%= score %> - <%= count %> |
       <% end %>
-      </ul>
-    </div>
+    </p>
   <% end %>
 
   <h2><%= gettext "Проголосовал" %></h2>
@@ -86,7 +82,7 @@
 </div>
 
 <div class="list">
-  <h2><%= gettext "В процессе голосования" %></h3>
+  <h2><%= gettext "В процессе голосования" %></h2>
   <div class="user-list">
   <%= for {user, opts} <- @room.user_list, opts[:vote] == nil do %>
     <button class="user-card" title="Участник еще не проголосовал">
@@ -113,18 +109,18 @@
     <text x="50%" y="65%" text-anchor="middle"><%= @room[:timer][:minutes] %>:<%= @room[:timer][:seconds] |> round() %></text>
   </svg>
 </div>
+<div class="timer-spacing"></div>
 <% end %>
 
-<div class="timer-spacing"/>
-
 <%= if @user == @room.owner_id do %>
-  <div class="list">
-    <h3><%= gettext "Памятка для администратора комнаты" %></h3>
+  <details class="list admin-help">
+    <summary><%= gettext "Памятка для администратора комнаты" %></summary>
     <p><%= gettext "1. Перед раундом убедитесь, что оценки очищены: нажмите \"Очистить голоса\", чтобы все участники начали заново." %></p>
     <p><%= gettext "2. Во время обсуждения участники выбирают карты. До открытия голосов оценки скрыты, поэтому никто не влияет на выбор других." %></p>
     <p><%= gettext "3. Когда все готовы, нажмите \"Показать голоса\". После просмотра можно снова скрыть оценки кнопкой \"Спрятать голоса\"." %></p>
     <p><%= gettext "4. Если участник ошибся или передумал, нажмите на его карточку в блоке \"Проголосовал\" - его голос будет сброшен." %></p>
     <p><%= gettext "5. Для ограничения времени используйте блок таймера: выберите длительность, при необходимости остановите таймер досрочно." %></p>
     <p><%= gettext "6. Ориентируйтесь на статистику: средний балл и распределение оценок помогают быстро выявить спорные задачи." %></p>
-  </div>
+  </details>
 <% end %>
+</div>
