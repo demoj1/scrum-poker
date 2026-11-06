@@ -32,16 +32,28 @@ jobs:
           echo "DOCKER_HOST=tcp://$GW:2375" >> "$GITHUB_ENV"
           DOCKER_HOST="tcp://$GW:2375" docker version --format 'docker {{.Server.Version}}'
 
+      - name: Вход в реестр
+        # до сборки: --cache-from тянет слои прошлого latest из приватного реестра
+        env:
+          REG_PASS: ${{ secrets.CI_BOT_TOKEN }}
+        run: |
+          [ -n "$REG_PASS" ] || { echo "секрет CI_BOT_TOKEN не задан"; exit 1; }
+          echo "$REG_PASS" | docker login "$REGISTRY" -u ci-infra --password-stdin
+
       - name: Сборка
-        run: docker build --pull -t "$IMAGE:sha-${{ github.sha }}" -t "$IMAGE:latest" .
+        # джоба попадает на DinD любой ноды, локального кеша слоёв там может не быть
+        run: |
+          docker build --pull \
+            --cache-from "$IMAGE:latest" \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            -t "$IMAGE:sha-${{ github.sha }}" -t "$IMAGE:latest" .
 
       - name: Проверка запуска без сети
-        # mix phx.server компилирует проект при старте, отсюда долгий цикл ожидания
         run: |
           docker rm -f scrum-poker-smoke >/dev/null 2>&1 || true
-          docker run -d --name scrum-poker-smoke --network none -e POKER_DISABLE_RELOAD=1 "$IMAGE:sha-${{ github.sha }}"
+          docker run -d --name scrum-poker-smoke --network none "$IMAGE:sha-${{ github.sha }}"
           ok=
-          for i in $(seq 1 60); do
+          for i in $(seq 1 30); do
             if docker exec scrum-poker-smoke curl -fsS -o /dev/null http://127.0.0.1:4005/ 2>/dev/null; then ok=1; break; fi
             sleep 5
           done
@@ -52,10 +64,7 @@ jobs:
 
       - name: Публикация в реестр
         if: github.ref_name == 'master'
-        env:
-          REG_PASS: ${{ secrets.CI_BOT_TOKEN }}
         run: |
-          echo "$REG_PASS" | docker login "$REGISTRY" -u ci-infra --password-stdin
           docker push "$IMAGE:sha-${{ github.sha }}"
           docker push "$IMAGE:latest"
 

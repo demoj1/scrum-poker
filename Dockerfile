@@ -8,13 +8,15 @@ RUN apt-get update \
 WORKDIR /app
 
 ENV MIX_ENV=dev
+# code_reloader в endpoint читается при компиляции: значение должно совпадать при сборке и запуске
+ENV POKER_DISABLE_RELOAD=1
 
 RUN mix local.hex --force && \
     mix local.rebar --force
 
 COPY mix.exs mix.lock ./
 COPY config config
-RUN mix deps.get
+RUN mix deps.get && mix deps.compile
 
 COPY assets/package.json assets/yarn.lock ./assets/
 RUN yarn --cwd ./assets install --frozen-lockfile
@@ -23,7 +25,7 @@ COPY priv priv
 COPY assets assets
 COPY lib lib
 
-RUN yarn --cwd ./assets deploy
+RUN yarn --cwd ./assets deploy && mix compile
 
 EXPOSE 4005
 
