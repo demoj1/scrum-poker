@@ -155,3 +155,18 @@ msgstr ""
 #: lib/poker_web/live/room_live.html.leex:56
 msgid "Статистика:"
 msgstr ""
+
+#, elixir-format
+#: lib/poker_web/live/room_live.html.leex
+msgid "Включить режим 18+"
+msgstr ""
+
+#, elixir-format
+#: lib/poker_web/live/room_live.html.leex
+msgid "Выключить режим 18+"
+msgstr ""
+
+#, elixir-format
+#: lib/poker_web/live/room_live.html.leex
+msgid "Сумма голосов больше 18"
+msgstr ""

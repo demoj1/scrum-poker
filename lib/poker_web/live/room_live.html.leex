@@ -1,7 +1,16 @@
-<div class="room">
+<div class="room <%= if @adult?, do: "adult" %>">
 <header>
   <h1 class="xs"><a href="/ws">Simple Scrum Poker</a></h1>
   <h1 class="sm"><a href="/ws">СП</a></h1>
+  <div class="header-center">
+    <%= if @adult? do %>
+      <button class="btn-adult" phx-click="toggle-adult"><%= gettext "Выключить режим 18+" %></button>
+    <% else %>
+      <%= if @vote_sum > 18 do %>
+        <button class="btn-adult btn-adult--blink" title="<%= gettext "Сумма голосов больше 18" %>" phx-click="toggle-adult"><%= gettext "Включить режим 18+" %></button>
+      <% end %>
+    <% end %>
+  </div>
   <div class="right-panel">
     <h2 class="xs"><%= gettext "Пользователь:" %> </h2>
     <h2><%= assigns[:user].name %></h2>
@@ -15,7 +24,7 @@
 <h2><%= gettext "Карты для оценки" %></h2>
 <div class="deck">
   <%= for num <- [1, 2, 3, 5, 8, 13, 20, 40, 100, "❓"] do %>
-    <button class="card" title="<%= gettext "Проголосовать" %>" phx-click="select-card" phx-value-score="<%= num %>">
+    <button class="card" data-v="<%= num %>" title="<%= gettext "Проголосовать" %>" phx-click="select-card" phx-value-score="<%= num %>">
       <%= num %>
     </button>
   <% end %>
@@ -54,9 +63,9 @@
   <%= if @user == @room.owner_id or @room[:open?] do %>
     <p class="statistic">
       <b><%= gettext "Статистика:" %></b>
-      <%= gettext "средний балл:" %> <%= @avg_score %> ·
+      <%= gettext "средний балл:" %> <%= @avg_score %>
       <%= for {score, count} <- (assigns[:count_in_group] || []), score != nil do %>
-        <%= score %> - <%= count %> |
+        <span class="vote-chip"><b><%= score %></b> × <%= count %></span>
       <% end %>
     </p>
   <% end %>
@@ -70,12 +79,16 @@
     <% else %>
     <button class="user-card" title="Показать карточку участника">
     <% end %>
+      <% open? = @room[:open?] || opts[:open?] %>
+      <span class="playing-card <%= if open?, do: "is-open" %>">
+        <span class="card-inner">
+          <%!-- пока голоса скрыты, значения в DOM нет — иначе подсматривают в инспекторе --%>
+          <% pic = @adult? && open? && adult_picture(opts[:vote]) %>
+          <span class="card-face <%= if pic, do: "has-pic" %>" style="<%= if pic, do: "background-image: url('#{pic}')" %>"><%= if open?, do: opts[:vote] %></span>
+          <span class="card-back"></span>
+        </span>
+      </span>
       <span class="user-name"><%= user.name %></span>
-      <%= if @room[:open?] or opts[:open?] do %>
-        <span class="user-vote"><%= opts[:vote] %></span>
-      <% else %>
-        <span class="user-hidden-vote">?</span>
-      <% end %>
     </button>
   <% end %>
   </div>
@@ -86,28 +99,23 @@
   <div class="user-list">
   <%= for {user, opts} <- @room.user_list, opts[:vote] == nil do %>
     <button class="user-card" title="Участник еще не проголосовал">
+      <span class="playing-card is-empty"></span>
       <span class="user-name"><%= user.name %></span>
-      <span class="user-hidden-vote">?</span>
     </button>
   <% end %>
   </div>
 </div>
 
-<%= if @room[:timer] do %>
-<div class="timer">
-  <svg class="progress-ring" viewBox="0 0 85 85" width="100" height="100">
-    <circle
-      class="progress-ring__circle"
-      stroke="blue"
-      stroke-width="5"
-      fill="#fbfbfb"
-      cx="-50%"
-      cy="50%"
-      r="40"
-      style="stroke-dasharray: 251.32 251.32; stroke-dashoffset: <%= 251.32 * (@room[:timer].current_seconds * 100 / @room[:timer].total_seconds) / 100 %>;"
-    />
-    <text x="50%" y="65%" text-anchor="middle"><%= @room[:timer][:minutes] %>:<%= @room[:timer][:seconds] |> round() %></text>
+<%= if timer = @room[:timer] do %>
+<% left = timer.current_seconds / timer.total_seconds %>
+<% level = cond do left > 0.5 -> "ok"; left > 0.2 -> "warn"; true -> "hot" end %>
+<div class="timer timer--<%= level %> <%= if timer.current_seconds <= 10, do: "timer--pulse" %>">
+  <svg class="timer-ring" viewBox="0 0 100 100">
+    <circle class="timer-track" cx="50" cy="50" r="30"/>
+    <%!-- 188.5 = 2π·30, длина окружности кольца --%>
+    <circle class="timer-progress" cx="50" cy="50" r="30" style="stroke-dashoffset: <%= 188.5 * (1 - left) %>"/>
   </svg>
+  <span class="timer-text"><%= timer.minutes |> trunc() |> Integer.to_string() |> String.pad_leading(2, "0") %>:<%= timer.seconds |> round() |> Integer.to_string() |> String.pad_leading(2, "0") %></span>
 </div>
 <div class="timer-spacing"></div>
 <% end %>

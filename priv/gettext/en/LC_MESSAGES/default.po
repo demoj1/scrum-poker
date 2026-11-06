@@ -155,3 +155,18 @@ msgstr "The name should be longer than 3 characters and shorter than 30"
 #: lib/poker_web/live/room_live.html.leex:56
 msgid "Статистика:"
 msgstr "Statistics:"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.html.leex
+msgid "Включить режим 18+"
+msgstr "Enable 18+ mode"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.html.leex
+msgid "Выключить режим 18+"
+msgstr "Disable 18+ mode"
+
+#, elixir-format
+#: lib/poker_web/live/room_live.html.leex
+msgid "Сумма голосов больше 18"
+msgstr "Vote sum is over 18"

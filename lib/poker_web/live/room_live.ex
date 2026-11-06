@@ -37,6 +37,8 @@ defmodule PokerWeb.RoomLive do
             socket
             |> assign(room: room)
             |> assign(avg_score: avg_score)
+            |> assign(vote_sum: room_vote_sum(room))
+            |> assign(adult?: false)
             |> assign(user: user)
           }
       end
@@ -138,6 +140,17 @@ defmodule PokerWeb.RoomLive do
   end
 
   @impl true
+  def handle_event("toggle-adult", _params, socket) do
+    enable? = not socket.assigns.adult?
+
+    if not enable? or room_vote_sum(socket.assigns.room) > 18 do
+      {:noreply, assign(socket, adult?: enable?)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
   def handle_event("stop-timer", _params, socket) do
     room = socket.assigns.room
 
@@ -168,6 +181,7 @@ defmodule PokerWeb.RoomLive do
       |> assign(count_in_group: count_in_group)
       |> assign(room: room)
       |> assign(avg_score: avg_score)
+      |> assign(vote_sum: room_vote_sum(room))
     }
   end
 
@@ -201,15 +215,31 @@ defmodule PokerWeb.RoomLive do
       |> Enum.filter(fn {_, v} -> v[:vote] != nil end)
       |> Enum.count()
 
-    sum_points =
-      room.user_list
-      |> Enum.filter(fn {_, v} ->
-        v[:vote] != nil and Integer.parse(v[:vote]) != :error
-      end)
-      |> Enum.map(fn {_, v} -> String.to_integer(v[:vote]) end)
-      |> Enum.sum()
+    sum_points = room_vote_sum(room)
 
     (is_nil(sum_points) || count_vote == 0) && "---" || Float.round(sum_points / count_vote, 2)
+  end
+
+  defp room_vote_sum(room) do
+    room.user_list
+    |> Enum.filter(fn {_, v} ->
+      v[:vote] != nil and Integer.parse(v[:vote]) != :error
+    end)
+    |> Enum.map(fn {_, v} -> String.to_integer(v[:vote]) end)
+    |> Enum.sum()
+  end
+
+  @adult_pictures %{
+    "1" => "1", "2" => "2", "3" => "3", "5" => "5", "8" => "8", "13" => "13",
+    "20" => "20", "40" => "40", "100" => "100", "❓" => "q"
+  }
+
+  # голос приходит от клиента как есть — в style попадает только имя файла из белого списка
+  def adult_picture(vote) do
+    case @adult_pictures[vote] do
+      nil -> nil
+      name -> "/images/adult/#{name}.webp"
+    end
   end
 
   defp owner?(room, user) do
