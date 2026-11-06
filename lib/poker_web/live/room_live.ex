@@ -38,7 +38,7 @@ defmodule PokerWeb.RoomLive do
             |> assign(room: room)
             |> assign(avg_score: avg_score)
             |> assign(vote_sum: room_vote_sum(room))
-            |> assign(adult?: false)
+            |> assign(adult?: connected?(socket) and get_connect_params(socket)["adult"] == true)
             |> assign(user: user)
           }
       end

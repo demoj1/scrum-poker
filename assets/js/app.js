@@ -18,7 +18,19 @@ import NProgress from "nprogress"
 import {LiveSocket} from "phoenix_live_view"
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}})
+const ADULT_KEY = "poker:adult"
+
+let Hooks = {}
+Hooks.AdultMode = {
+  mounted() { this.save() },
+  updated() { this.save() },
+  save() { localStorage.setItem(ADULT_KEY, this.el.dataset.adult) }
+}
+
+let liveSocket = new LiveSocket("/live", Socket, {
+  hooks: Hooks,
+  params: {_csrf_token: csrfToken, adult: localStorage.getItem(ADULT_KEY) === "true"}
+})
 
 // Show progress bar on live navigation and form submits
 window.addEventListener("phx:page-loading-start", info => NProgress.start())

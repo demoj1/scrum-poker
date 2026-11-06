@@ -1,4 +1,4 @@
-<div class="room <%= if @adult?, do: "adult" %>">
+<div id="room" class="room <%= if @adult?, do: "adult" %>" phx-hook="AdultMode" data-adult="<%= @adult? %>">
 <header>
   <h1 class="xs"><a href="/ws">Simple Scrum Poker</a></h1>
   <h1 class="sm"><a href="/ws">СП</a></h1>
