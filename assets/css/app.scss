@@ -562,17 +562,6 @@ body:has(.room.adult) {
 }
 
 .room.adult {
-  .card {
-    color: transparent;
-    text-shadow: 0 0 10px $card-red;
-
-    &:hover,
-    &:focus {
-      color: $card-red;
-      text-shadow: none;
-    }
-  }
-
   .user-list {
     background: radial-gradient(ellipse at center, #8e1b2c 0%, #4a0d18 100%);
     border-color: #2b1a10;
@@ -586,25 +575,6 @@ body:has(.room.adult) {
       font-size: 1.6rem;
       font-weight: 700;
       text-shadow: 0 0 4px $card-red, 0 0 8px $card-red;
-    }
-  }
-
-  .card-face {
-    overflow: hidden;
-
-    &::after {
-      content: "ЦЕНЗУРА";
-      position: absolute;
-      right: -6px;
-      bottom: 14px;
-      left: -6px;
-      padding: 2px 0;
-      background: #111;
-      color: #fff;
-      font-size: 0.8rem;
-      letter-spacing: 0.1rem;
-      text-align: center;
-      transform: rotate(-12deg);
     }
   }
 
